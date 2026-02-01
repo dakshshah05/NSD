@@ -7,7 +7,7 @@ import { Zap, Home, TrendingDown, AlertTriangle } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import StatCard from '../components/StatCard';
-import { historicalData } from '../data/mockData';
+import { getMockData } from '../data/mockData';
 import { useDate } from '../context/DateContext';
 
 gsap.registerPlugin(useGSAP);
@@ -15,7 +15,7 @@ gsap.registerPlugin(useGSAP);
 const Dashboard = () => {
   const containerRef = useRef(null);
   const { selectedDate } = useDate();
-  const dayData = historicalData[selectedDate] || Object.values(historicalData)[0];
+  const dayData = getMockData(selectedDate);
   
   const [stats, setStats] = useState({
     consumption: dayData.totalConsumption,

@@ -7,7 +7,8 @@ import {
   Lightbulb, 
   Settings, 
   Cpu, 
-  X
+  X,
+  FileText
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -38,6 +39,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Live Rooms', path: '/rooms', icon: Zap },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
     { name: 'AI Recommendations', path: '/recommendations', icon: Cpu },
+    { name: 'Reports', path: '/reports', icon: FileText },
     { name: 'Smart Controls', path: '/controls', icon: Lightbulb },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];

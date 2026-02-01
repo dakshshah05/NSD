@@ -7,6 +7,7 @@ import Analytics from './pages/Analytics';
 import Recommendations from './pages/Recommendations';
 import Controls from './pages/Controls';
 import Settings from './pages/Settings';
+import Reports from './pages/Reports';
 
 import { DateProvider } from './context/DateContext';
 
@@ -20,6 +21,7 @@ function App() {
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/recommendations" element={<Recommendations />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="/controls" element={<Controls />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>

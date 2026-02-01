@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
-import { recommendationsData, historicalData } from '../data/mockData';
+import { recommendationsData, getMockData } from '../data/mockData';
 import RecommendationCard from '../components/RecommendationCard';
 import { Sparkles, Check, RefreshCw, Loader2, Calendar } from 'lucide-react';
 import { analyzeEnergyData } from '../services/gemini';
-import { clsx } from 'clsx';
-import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
-
 import { useDate } from '../context/DateContext';
-
-gsap.registerPlugin(useGSAP);
 
 const Recommendations = () => {
   const [recommendations, setRecommendations] = useState(recommendationsData);
@@ -18,7 +12,7 @@ const Recommendations = () => {
   const [toast, setToast] = useState(null);
   
   // Use Global Date
-  const { selectedDate, today } = useDate();
+  const { selectedDate } = useDate();
 
   const handleApply = (id) => {
     const rec = recommendations.find(r => r.id === id);
@@ -33,36 +27,43 @@ const Recommendations = () => {
     setLoading(true);
     setToast(`Analyzing data for ${selectedDate}...`);
     
-    // Get context for specific date
-    const dayData = historicalData[selectedDate] || historicalData[today]; // Fallback if date missing
-    
-    // Prepare context
-    const context = {
-        date: selectedDate,
-        totalConsumption: dayData.totalConsumption,
-        trends: dayData.trends,
-        blocks: dayData.blocks,
-        knownIssues: dayData.wasteEvents || []
-    };
+    try {
+        // Get context for specific date safely
+        const dayData = getMockData(selectedDate);
+        
+        // Prepare context
+        const context = {
+            date: selectedDate,
+            totalConsumption: dayData?.totalConsumption || 0,
+            trends: dayData?.trends || [],
+            blocks: dayData?.blocks || [],
+            knownIssues: dayData?.wasteEvents || []
+        };
 
-    const result = await analyzeEnergyData(context);
-    
-    if (result.recommendations) {
-        const mappedRecs = result.recommendations.map(r => ({
-            id: r.id || Math.random(),
-            issue: r.title,
-            insight: r.description,
-            recommendation: r.action || "Apply Fix",
-            savings: r.savings,
-            priority: r.priority,
-            type: r.priority === 'High' ? 'critical' : 'warning'
-        }));
+        const result = await analyzeEnergyData(context);
+        
+        if (result && result.recommendations) {
+            const mappedRecs = result.recommendations.map(r => ({
+                id: r.id || Math.random(),
+                issue: r.title,
+                insight: r.description,
+                recommendation: r.action || "Apply Fix",
+                savings: r.savings,
+                priority: r.priority,
+                type: r.priority === 'High' ? 'critical' : 'warning',
+                room: 'System Wide', // Default since API doesn't return room
+                block: 'General'     // Default
+            }));
 
-        setRecommendations(mappedRecs);
-        setAiSummary(result.summary);
-        setToast("Analysis Complete!");
-    } else {
-        setToast("Analysis failed. Check API configuration.");
+            setRecommendations(mappedRecs);
+            setAiSummary(result.summary);
+            setToast("Analysis Complete!");
+        } else {
+            setToast("Analysis returned no results.");
+        }
+    } catch (error) {
+        console.error("Analysis Error:", error);
+        setToast("Analysis failed. See console.");
     }
     
     setLoading(false);
@@ -70,7 +71,7 @@ const Recommendations = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in relative min-h-[80vh]">
+    <div className="space-y-6 min-h-[80vh]">
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 right-6 bg-slate-800 border border-slate-700 text-white px-6 py-3 rounded-lg shadow-xl flex items-center space-x-3 z-50 animate-bounce">
@@ -101,10 +102,7 @@ const Recommendations = () => {
                     <button 
                         onClick={handleAnalyze}
                         disabled={loading}
-                        className={clsx(
-                            "flex items-center justify-center px-6 py-3 rounded-lg font-bold transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95",
-                            loading ? "bg-indigo-400 cursor-wait" : "bg-white text-indigo-600 hover:bg-indigo-50"
-                        )}
+                        className={`flex items-center justify-center px-6 py-3 rounded-lg font-bold transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 ${loading ? "bg-indigo-400 cursor-wait" : "bg-white text-indigo-600 hover:bg-indigo-50"}`}
                     >
                         {loading ? (
                             <>
@@ -127,7 +125,7 @@ const Recommendations = () => {
       {/* Recommendations Grid */}
       <h3 className="text-xl font-bold text-white flex items-center">
         <span className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-sm mr-3 border border-emerald-500/20">
-            {selectedDate === today ? "Today's Insights" : `Insights for ${selectedDate}`}
+            Insights for {selectedDate}
         </span>
       </h3>
       

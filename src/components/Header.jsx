@@ -27,7 +27,7 @@ const Header = ({ onMenuClick, title }) => {
                 type="date" 
                 value={selectedDate}
                 max={today}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
                 className="bg-transparent text-sm text-slate-200 focus:outline-none w-28 md:w-auto"
             />
         </div>

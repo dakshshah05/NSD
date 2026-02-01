@@ -3,13 +3,13 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip as ReTooltip,
   ComposedChart, Line, Area, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
-import { historicalData } from '../data/mockData';
+import { getMockData } from '../data/mockData';
 import { useDate } from '../context/DateContext';
 import { AlertTriangle, TrendingUp, Info } from 'lucide-react';
 
 const Analytics = () => {
   const { selectedDate } = useDate();
-  const dayData = historicalData[selectedDate] || Object.values(historicalData)[0];
+  const dayData = getMockData(selectedDate);
   
   // Dynamic Data
   const usageBreakdown = dayData.usageBreakdown || [

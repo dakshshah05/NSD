@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 import RoomCard from '../components/RoomCard';
-import { historicalData } from '../data/mockData'; 
+import { getMockData } from '../data/mockData'; 
 import { useDate } from '../context/DateContext';
 
 const Rooms = () => {
@@ -9,7 +9,7 @@ const Rooms = () => {
   const [filter, setFilter] = useState('all'); // all, occupied, vacant, wastage
   
   const { selectedDate } = useDate();
-  const dayData = historicalData[selectedDate] || Object.values(historicalData)[0];
+  const dayData = getMockData(selectedDate);
   const roomStatusData = dayData.rooms; // Use dynamic room data
 
   // Filter logic
