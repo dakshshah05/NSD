@@ -1,0 +1,120 @@
+import React, { useRef } from 'react';
+import { NavLink } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  Zap, 
+  BarChart3, 
+  Lightbulb, 
+  Settings, 
+  Cpu, 
+  X
+} from 'lucide-react';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
+
+const Sidebar = ({ isOpen, onClose }) => {
+  const containerRef = useRef(null);
+
+  useGSAP(() => {
+    gsap.fromTo(".nav-item", 
+      { x: -20, opacity: 0 },
+      { 
+        x: 0, 
+        opacity: 1, 
+        duration: 0.5, 
+        stagger: 0.1, 
+        ease: "power2.out",
+        delay: 0.2
+      }
+    );
+  }, { scope: containerRef });
+
+  const navItems = [
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Live Rooms', path: '/rooms', icon: Zap },
+    { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+    { name: 'AI Recommendations', path: '/recommendations', icon: Cpu },
+    { name: 'Smart Controls', path: '/controls', icon: Lightbulb },
+    { name: 'Settings', path: '/settings', icon: Settings },
+  ];
+
+  return (
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar Container */}
+      <aside 
+        ref={containerRef}
+        className={twMerge(
+          "fixed top-0 left-0 h-full w-64 bg-slate-900 border-r border-slate-800 z-50 transition-transform duration-300 ease-in-out md:translate-x-0",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-slate-800 h-16">
+          <div className="flex items-center space-x-2 text-emerald-400">
+            <Zap size={28} fill="currentColor" />
+            <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+              EnergyGuard
+            </span>
+          </div>
+          <button 
+            onClick={onClose}
+            className="md:hidden text-slate-400 hover:text-white"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <nav className="p-4 space-y-2">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={() => { if(window.innerWidth < 768) onClose(); }}
+              className={({ isActive }) => 
+                clsx(
+                  "nav-item flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group font-medium",
+                  isActive 
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.1)]" 
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <item.icon size={20} className={isActive ? "text-emerald-400" : "text-slate-500 group-hover:text-slate-300"} />
+                  <span>{item.name}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="absolute bottom-0 w-full p-4 border-t border-slate-800 bg-slate-900/50 backdrop-blur">
+          <div className="flex items-center space-x-3 text-slate-400 hover:text-white transition-colors cursor-pointer">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-blue-500 flex items-center justify-center shadow-lg">
+              <span className="text-xs font-bold text-white">AD</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-white">Admin User</p>
+              <p className="text-xs text-slate-500">Campus Manager</p>
+            </div>
+            <Settings size={16} />
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+};
+
+export default Sidebar;
