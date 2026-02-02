@@ -21,7 +21,7 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="h-screen bg-slate-950 text-slate-50 flex overflow-hidden">
+    <div className="h-screen bg-[rgb(var(--bg-main))] text-[rgb(var(--text-main))] flex overflow-hidden transition-colors duration-300">
       {/* Sidebar */}
       <Sidebar 
         isOpen={isSidebarOpen} 

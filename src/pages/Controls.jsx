@@ -25,18 +25,18 @@ const Controls = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="bg-[rgb(var(--bg-card))]/50 p-6 rounded-2xl border border-[rgb(var(--border))] flex flex-col md:flex-row justify-between items-center gap-4">
          <div>
-            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-[rgb(var(--text-main))] mb-2 flex items-center gap-2">
                 <Sliders size={24} className="text-emerald-400" />
                 Global Controls
             </h2>
-            <p className="text-slate-400 text-sm">Manage all sensors and devices across campus</p>
+            <p className="text-[rgb(var(--text-muted))] text-sm">Manage all sensors and devices across campus</p>
          </div>
          <div className="flex gap-3">
              <button 
                 onClick={() => handleGlobalAutomationPayload(false)}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-all"
+                className="px-4 py-2 rounded-lg bg-[rgb(var(--bg-input))] hover:bg-opacity-80 text-[rgb(var(--text-muted))] font-medium transition-all"
              >
                 Manual Override All
              </button>

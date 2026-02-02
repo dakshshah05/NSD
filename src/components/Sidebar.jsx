@@ -58,11 +58,11 @@ const Sidebar = ({ isOpen, onClose }) => {
       <aside 
         ref={containerRef}
         className={twMerge(
-          "fixed top-0 left-0 h-full w-64 bg-slate-900 border-r border-slate-800 z-50 transition-transform duration-300 ease-in-out md:translate-x-0",
+          "fixed top-0 left-0 h-full w-64 bg-[rgb(var(--bg-card))] border-r border-[rgb(var(--border))] z-50 transition-transform duration-300 ease-in-out md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-800 h-16">
+        <div className="flex items-center justify-between p-4 border-b border-[rgb(var(--border))] h-16">
           <div className="flex items-center space-x-2 text-emerald-400">
             <Zap size={28} fill="currentColor" />
             <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
@@ -88,13 +88,13 @@ const Sidebar = ({ isOpen, onClose }) => {
                   "nav-item flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group font-medium",
                   isActive 
                     ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.1)]" 
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    : "text-[rgb(var(--text-muted))] hover:bg-[rgb(var(--bg-input))] hover:text-[rgb(var(--text-main))]"
                 )
               }
             >
               {({ isActive }) => (
                 <>
-                  <item.icon size={20} className={isActive ? "text-emerald-400" : "text-slate-500 group-hover:text-slate-300"} />
+                  <item.icon size={20} className={isActive ? "text-emerald-400" : "text-[rgb(var(--text-muted))] group-hover:text-[rgb(var(--text-sec))]"} />
                   <span>{item.name}</span>
                 </>
               )}
@@ -102,14 +102,14 @@ const Sidebar = ({ isOpen, onClose }) => {
           ))}
         </nav>
 
-        <div className="absolute bottom-0 w-full p-4 border-t border-slate-800 bg-slate-900/50 backdrop-blur">
-          <div className="flex items-center space-x-3 text-slate-400 hover:text-white transition-colors cursor-pointer">
+        <div className="absolute bottom-0 w-full p-4 border-t border-[rgb(var(--border))] bg-[rgb(var(--bg-card))]/50 backdrop-blur">
+          <div className="flex items-center space-x-3 text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text-main))] transition-colors cursor-pointer">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-blue-500 flex items-center justify-center shadow-lg">
               <span className="text-xs font-bold text-white">AD</span>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-white">Admin User</p>
-              <p className="text-xs text-slate-500">Campus Manager</p>
+              <p className="text-sm font-medium text-[rgb(var(--text-main))]">Admin User</p>
+              <p className="text-xs text-[rgb(var(--text-muted))]">Campus Manager</p>
             </div>
             <Settings size={16} />
           </div>

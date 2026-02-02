@@ -118,17 +118,18 @@ const Dashboard = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Line Chart */}
-        <div className="gsap-chart bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <h3 className="text-lg font-bold text-white mb-4">Energy Consumption Trend <span className="text-slate-500 text-sm font-normal">({selectedDate})</span></h3>
+        {/* Line Chart */}
+        <div className="gsap-chart bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg">
+          <h3 className="text-lg font-bold text-[rgb(var(--text-main))] mb-4">Energy Consumption Trend <span className="text-[rgb(var(--text-muted))] text-sm font-normal">({selectedDate})</span></h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart key={selectedDate} data={energyTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="time" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />
+                <XAxis dataKey="time" stroke="rgb(var(--text-muted))" />
+                <YAxis stroke="rgb(var(--text-muted))" />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
-                  itemStyle={{ color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: 'rgb(var(--bg-card))', borderColor: 'rgb(var(--border))', color: 'rgb(var(--text-main))' }}
+                  itemStyle={{ color: 'rgb(var(--text-main))' }}
                 />
                 <Line 
                   type="monotone" 
@@ -144,17 +145,17 @@ const Dashboard = () => {
         </div>
 
         {/* Bar Chart */}
-        <div className="gsap-chart bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <h3 className="text-lg font-bold text-white mb-4">Consumption by Block <span className="text-slate-500 text-sm font-normal">({dayData.scenario.replace('_', ' ')})</span></h3>
+        <div className="gsap-chart bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg">
+          <h3 className="text-lg font-bold text-[rgb(var(--text-main))] mb-4">Consumption by Block <span className="text-[rgb(var(--text-muted))] text-sm font-normal">({dayData.scenario.replace('_', ' ')})</span></h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart key={selectedDate} data={blockConsumptionData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="block" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />
+                <XAxis dataKey="block" stroke="rgb(var(--text-muted))" interval={0} tick={{ fontSize: 12 }} />
+                <YAxis stroke="rgb(var(--text-muted))" />
                 <Tooltip 
-                  cursor={{ fill: '#334155', opacity: 0.4 }}
-                  contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
+                  cursor={{ fill: 'rgb(var(--bg-input))', opacity: 0.4 }}
+                  contentStyle={{ backgroundColor: 'rgb(var(--bg-card))', borderColor: 'rgb(var(--border))', color: 'rgb(var(--text-main))' }}
                 />
                 <Bar dataKey="consumption" radius={[6, 6, 0, 0]}>
                   {blockConsumptionData.map((entry, index) => (

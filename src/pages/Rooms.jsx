@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter } from 'lucide-react';
 import RoomCard from '../components/RoomCard';
 import { getMockData } from '../data/mockData'; 
 import { useDate } from '../context/DateContext';
+import { useLocation } from 'react-router-dom';
 
 const Rooms = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const [searchTerm, setSearchTerm] = useState(location.state?.searchTerm || '');
   const [filter, setFilter] = useState('all'); // all, occupied, vacant, wastage
   
   const { selectedDate } = useDate();
   const dayData = getMockData(selectedDate);
   const roomStatusData = dayData.rooms; // Use dynamic room data
+
+  // React to search from Header
+  useEffect(() => {
+    if (location.state?.searchTerm) {
+        setSearchTerm(location.state.searchTerm);
+    }
+  }, [location.state]);
 
   // Filter logic
   const filteredRooms = roomStatusData.filter(room => {
@@ -34,7 +43,8 @@ const Rooms = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Filters & Search */}
-      <div className="flex flex-col md:flex-row justify-between items-center bg-slate-900/50 p-4 rounded-xl border border-slate-800 backdrop-blur-sm">
+      {/* Filters & Search */}
+      <div className="flex flex-col md:flex-row justify-between items-center bg-[rgb(var(--bg-card))]/50 p-4 rounded-xl border border-[rgb(var(--border))] backdrop-blur-sm">
         <div className="flex items-center space-x-2 md:space-x-4 w-full md:w-auto mb-4 md:mb-0">
            <Filter className="text-emerald-400" size={20} />
            <div className="flex space-x-2 overflow-x-auto">
@@ -45,7 +55,7 @@ const Rooms = () => {
                  className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-all ${
                    filter === f 
                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25' 
-                     : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                     : 'bg-[rgb(var(--bg-input))] text-slate-800 dark:text-slate-300 hover:bg-opacity-80'
                  }`}
                >
                  {f}
@@ -55,13 +65,13 @@ const Rooms = () => {
         </div>
 
         <div className="relative w-full md:w-64">
-           <Search className="absolute left-3 top-2.5 text-slate-500" size={18} />
+           <Search className="absolute left-3 top-2.5 text-[rgb(var(--text-muted))]" size={18} />
            <input 
              type="text" 
              placeholder="Search rooms..." 
              value={searchTerm}
              onChange={(e) => setSearchTerm(e.target.value)}
-             className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-600"
+             className="w-full bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg py-2 pl-10 pr-4 text-[rgb(var(--text-main))] focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-[rgb(var(--text-muted))]"
            />
         </div>
       </div>

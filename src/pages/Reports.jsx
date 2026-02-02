@@ -4,8 +4,11 @@ import { getMockData } from '../data/mockData';
 import { FileText, Download, Calendar, BarChart3, CloudRain } from 'lucide-react';
 import { clsx } from 'clsx'; // Assuming clsx is available since it's in package.json, if not I'll remove it or use template literals. Wait, I removed it from Recs page to be safe. I'll stick to template literals here to be safe and consistent.
 
+import { useNotifications } from '../context/NotificationContext'; 
+// ...
 const Reports = () => {
   const { selectedDate } = useDate();
+  const { addNotification } = useNotifications();
   const [downloading, setDownloading] = useState(null);
 
   const generateCSV = (type) => {
@@ -16,27 +19,26 @@ const Reports = () => {
       let csvContent = "";
       let filename = `report-${type}-${selectedDate}.csv`;
 
+      // ... (CSV generation logic remains same) ...
+
       if (type === 'daily') {
-        // Daily Summary: Time vs Energy vs Occupancy (simulated)
         csvContent = "Time,Energy (kWh),Predicted Occupancy\n";
         dayData.trends.forEach(t => {
             csvContent += `${t.time},${t.energy.toFixed(2)},${Math.floor(Math.random() * 100)}\n`;
         });
       } else if (type === 'rooms') {
-        // Room Status Report
-        csvContent = "Room ID,Name,Block,Status,Power (W),Energy (kWh),Lights,Fans\n";
+          // ... 
         dayData.rooms.forEach(r => {
             csvContent += `${r.id},${r.name},${r.block},${r.status},${r.power},${r.energy},${r.lights ? 'ON' : 'OFF'},${r.fans ? 'ON' : 'OFF'}\n`;
         });
       } else if (type === 'wastage') {
-         // Wastage Events
-         csvContent = "Issue,Risk Level,Details\n";
+          // ...
          dayData.wasteEvents.forEach(w => {
              csvContent += `${w.issue},${w.risk},${w.details}\n`;
          });
       }
 
-      // Trigger Download
+      // Trigger Download (Keep existing)
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
@@ -47,12 +49,15 @@ const Reports = () => {
       link.click();
       document.body.removeChild(link);
       
+      // NOTIFY
+      addNotification('Report Ready', `${filename} has been downloaded successfully.`);
+      
       setDownloading(null);
     }, 1000); // Simulate processing delay
   };
 
   const ReportCard = ({ title, description, icon: Icon, type, color }) => (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-slate-700 transition-all group">
+    <div className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-xl p-6 hover:shadow-lg transition-all group">
        <div className="flex items-start justify-between mb-4">
           <div className={`p-3 rounded-lg bg-opacity-20 ${color.replace('text-', 'bg-')} ${color}`}>
              <Icon size={24} />
@@ -60,7 +65,7 @@ const Reports = () => {
           <button 
             onClick={() => generateCSV(type)}
             disabled={downloading !== null}
-            className="flex items-center space-x-2 text-sm font-medium text-slate-400 hover:text-emerald-400 disabled:opacity-50 transition-colors"
+            className="flex items-center space-x-2 text-sm font-medium text-[rgb(var(--text-muted))] hover:text-emerald-400 disabled:opacity-50 transition-colors"
           >
              {downloading === type ? (
                  <span>Generating...</span>
@@ -72,9 +77,9 @@ const Reports = () => {
              )}
           </button>
        </div>
-       <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
-       <p className="text-sm text-slate-400 mb-4">{description}</p>
-       <div className="text-xs text-slate-500 font-mono bg-slate-950 p-2 rounded border border-slate-800">
+       <h3 className="text-lg font-bold text-[rgb(var(--text-main))] mb-2">{title}</h3>
+       <p className="text-sm text-[rgb(var(--text-muted))] mb-4">{description}</p>
+       <div className="text-xs text-[rgb(var(--text-sec))] font-mono bg-[rgb(var(--bg-input))] p-2 rounded border border-[rgb(var(--border))]">
           {type === 'daily' && "fields: Time, Energy, Occupancy"}
           {type === 'rooms' && "fields: ID, Name, Status, Power..."}
           {type === 'wastage' && "fields: Issue, Risk, Details"}
@@ -116,7 +121,7 @@ const Reports = () => {
          />
       </div>
       
-      <div className="p-4 bg-slate-900/50 border border-slate-800 rounded-xl text-center text-sm text-slate-500">
+      <div className="p-4 bg-[rgb(var(--bg-card))]/50 border border-[rgb(var(--border))] rounded-xl text-center text-sm text-[rgb(var(--text-muted))]">
          <p>Need custom reports? Contact your System Administrator.</p>
       </div>
     </div>

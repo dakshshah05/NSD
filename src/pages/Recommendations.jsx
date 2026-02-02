@@ -3,6 +3,7 @@ import { recommendationsData, getMockData } from '../data/mockData';
 import RecommendationCard from '../components/RecommendationCard';
 import { Sparkles, Check, RefreshCw, Loader2, Calendar } from 'lucide-react';
 import { analyzeEnergyData } from '../services/gemini';
+import { useNotifications } from '../context/NotificationContext';
 import { useDate } from '../context/DateContext';
 
 const Recommendations = () => {
@@ -11,12 +12,15 @@ const Recommendations = () => {
   const [aiSummary, setAiSummary] = useState(null);
   const [toast, setToast] = useState(null);
   
-  // Use Global Date
   const { selectedDate } = useDate();
+  const { addNotification } = useNotifications();
 
   const handleApply = (id) => {
     const rec = recommendations.find(r => r.id === id);
     if (!rec) return;
+    
+    // Global Notification
+    addNotification('Fix Applied', `Optimized ${rec.issue} for ${rec.savings} savings.`);
     
     setToast(`Applied fix for: ${rec.title || rec.issue}`);
     setRecommendations(prev => prev.filter(r => r.id !== id));
