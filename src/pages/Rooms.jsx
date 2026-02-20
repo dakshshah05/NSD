@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter } from 'lucide-react';
 import RoomCard from '../components/RoomCard';
-import { getMockData } from '../data/mockData'; 
+import { fetchRoomStatus } from '../data/historicalData'; 
 import { useDate } from '../context/DateContext';
 import { useLocation } from 'react-router-dom';
 
@@ -11,8 +11,16 @@ const Rooms = () => {
   const [filter, setFilter] = useState('all'); // all, occupied, vacant, wastage
   
   const { selectedDate } = useDate();
-  const dayData = getMockData(selectedDate);
-  const roomStatusData = dayData.rooms; // Use dynamic room data
+  const [roomStatusData, setRoomStatusData] = useState([]);
+
+  useEffect(() => {
+      async function load() {
+          const data = await fetchRoomStatus();
+          setRoomStatusData(data || []);
+      }
+      load();
+  }, [selectedDate]); // Re-fetch on date change? Supabase table is static currently but good practice.
+
 
   // React to search from Header
   useEffect(() => {

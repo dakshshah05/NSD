@@ -16,6 +16,7 @@ const Layout = ({ children }) => {
       case '/recommendations': return 'AI Optimization Engine';
       case '/controls': return 'Smart Controls';
       case '/settings': return 'System Settings';
+      case '/profile': return 'User Profile';
       default: return 'Smart Energy System';
     }
   };

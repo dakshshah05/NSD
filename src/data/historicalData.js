@@ -1,99 +1,140 @@
-export const generateHistoricalData = () => {
-  const data = {};
-  const today = new Date();
-  
-  const scenarios = [
-    { type: 'NORMAL', base: 12000, label: 'Standard Operation' },
-    { type: 'HIGH_LOAD', base: 18000, label: 'Heatwave / High Demand' },
-    { type: 'WEEKEND', base: 8000, label: 'Weekend / Holiday' },
-    { type: 'LEAKAGE', base: 14000, label: 'Equipment Malfunction' },
-    { type: 'EVENT', base: 16000, label: 'Campus Festival' }
-  ];
+import { supabase } from '../lib/supabaseClient';
+import { generateHistoricalData } from './dataGenerator';
 
-  for (let i = 0; i < 30; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    const dateKey = date.toISOString().split('T')[0];
-    
-    // Pick a random scenario, favoring NORMAL
-    let scenario = scenarios[0];
-    const rand = Math.random();
-    if (rand > 0.8) scenario = scenarios[1]; // High Load
-    else if (rand > 0.6) scenario = scenarios[3]; // Leakage
-    else if (date.getDay() === 0 || date.getDay() === 6) scenario = scenarios[2]; // Weekend logic
-    
-    // Base fluctuation
-    const dailyConsumption = Math.floor(scenario.base + Math.random() * 2000);
-    
-    const wasteEvents = [];
-    
-    // Generate context-specific issues
-    if (scenario.type === 'HIGH_LOAD') {
-        wasteEvents.push({ issue: "HVAC System Overload in Block A", risk: "Critical", details: "Cooling demand exceeding setpoints by 40%." });
-        wasteEvents.push({ issue: "Peak Demand Violation", risk: "High", details: "Crossed grid threshold at 2 PM." });
-    } else if (scenario.type === 'WEEKEND') {
-        wasteEvents.push({ issue: "Unnecessary Lighting in Academic Block", risk: "Medium", details: "Lights active in empty classrooms." });
-        wasteEvents.push({ issue: "Cafeteria Refrigeration Check", risk: "Low", details: "Weekend mode not activated." });
-    } else if (scenario.type === 'LEAKAGE') {
-        wasteEvents.push({ issue: "Water Pump Continuous Run", risk: "High", details: "Pump active for 24h, possible sensor failure." });
-        wasteEvents.push({ issue: "Phantom Load in Labs", risk: "Medium", details: "Standby power 3x higher than norm." });
-    } else if (scenario.type === 'EVENT') {
-        wasteEvents.push({ issue: "Auditorium HVAC Spike", risk: "Medium", details: "Events usage optimized?" });
-        wasteEvents.push({ issue: "Stage Lighting Power Draw", risk: "Low", details: "High consumption detected during rehearsal." });
-    } else {
-        // NORMAL CASE - Add variation so it's not empty
-        const normalIssues = [
-            { issue: "Routine Sensor Calibration", risk: "Low", details: "Sensors in Block B showing minor drift (0.5°C)." },
-            { issue: "Optimize Corridors Lighting", risk: "Low", details: "Daylight harvesting could save 2% in Block A." },
-            { issue: "Check Solar Panel Efficiency", risk: "Medium", details: "Output 5% lower than expected clear sky model." },
-            { issue: "Computer Lab Sleep Settings", risk: "Low", details: "Check if auto-shutdown policies are active in Lab 3." },
-            { issue: "Library HVAC Setpoint", risk: "Low", details: "Temperature set 2°C lower than recommended ASHRAE standards." },
-            { issue: "Cafeteria Exhaust Fan Schedule", risk: "Medium", details: "Fans running 2 hours post-closing time." },
-            { issue: "Streetlight Timer Adjustment", risk: "Low", details: "Lights turning on 15 mins before sunset." },
-            { issue: "Water Cooler Timer Optimization", risk: "Low", details: "Coolers cooling water during weekends/nights." },
-            { issue: "Vending Machine Energy Saver", risk: "Low", details: "Compressors cycling too frequently." },
-            { issue: "Projector Standby Power", risk: "Low", details: "Classroom projectors drawing 50W in standby." },
-            { issue: "Server Room Cold Aisle Containment", risk: "Medium", details: "Mixing of hot/cold air reducing cooling efficiency." },
-            { issue: "Thermal Leak Detection", risk: "Medium", details: "Infrared scan suggests gap in Block C windows." },
-            { issue: "Motion Sensor Sensitivity", risk: "Low", details: "False triggers in corridors causing lights to stay on." },
-            { issue: "Elevator Idle Mode", risk: "Low", details: "Elevators not entering deep sleep mode off-hours." },
-            { issue: "Irrigation Pump Schedule", risk: "Medium", details: "Watering occurring during peak evaporation hours." },
-            { issue: "Gym Treadmill Standby", risk: "Low", details: "Equipment left fully on 24/7." },
-            { issue: "Printer/Copier Eco Mode", risk: "Low", details: "Admin block printers disabling sleep mode." },
-            { issue: "Dormitory Geyser Timer", risk: "High", details: "Hot water circulation pumps running continuously." }
-        ];
-        
-        // Pick 3 random normal issues to ensure variety
-        const shuffled = normalIssues.sort(() => 0.5 - Math.random());
-        wasteEvents.push(shuffled[0]);
-        wasteEvents.push(shuffled[1]);
-        wasteEvents.push(shuffled[2]);
-    }
+// --- HELPER FOR DATE FORMATTING ---
+const formatDateKey = (date) => date.toISOString().split('T')[0];
+const todayKey = formatDateKey(new Date());
 
-    data[dateKey] = {
-      date: dateKey,
-      scenario: scenario.type, // Helper for debug
-      totalConsumption: dailyConsumption,
-      trends: [
-        { time: '00:00', energy: Math.floor(dailyConsumption * 0.05) },
-        { time: '04:00', energy: Math.floor(dailyConsumption * 0.04) },
-        { time: '08:00', energy: Math.floor(dailyConsumption * 0.15) },
-        { time: '12:00', energy: Math.floor(dailyConsumption * (scenario.type === 'HIGH_LOAD' ? 0.35 : 0.25)) }, // Spike at noon for High Load
-        { time: '16:00', energy: Math.floor(dailyConsumption * 0.20) },
-        { time: '20:00', energy: Math.floor(dailyConsumption * 0.18) },
-        { time: '23:59', energy: Math.floor(dailyConsumption * 0.13) },
-      ],
-      blocks: [
-        { block: 'Block A', consumption: Math.floor(dailyConsumption * 0.25) },
-        { block: 'Block B', consumption: Math.floor(dailyConsumption * 0.20) },
-        { block: 'Block C', consumption: Math.floor(dailyConsumption * 0.15) },
-        { block: 'Boys Hostel', consumption: Math.floor(dailyConsumption * 0.20) },
-        { block: 'Girls Hostel', consumption: Math.floor(dailyConsumption * 0.20) },
-      ],
-      wasteEvents: wasteEvents
-    };
-  }
-  return data;
+// --- HELPER GEN LOGIC ---
+const generateUsageBreakdown = (scenarioType) => {
+    let baseBreakdown = [65, 20, 15]; 
+    if (scenarioType === 'HIGH_LOAD') baseBreakdown = [50, 15, 35];
+    else if (scenarioType === 'WEEKEND') baseBreakdown = [30, 60, 10];
+    else if (scenarioType === 'LEAKAGE') baseBreakdown = [60, 10, 30];
+
+    const variance1 = Math.floor(Math.random() * 6) - 3;
+    const variance2 = Math.floor(Math.random() * 6) - 3;
+    const finalBreakdown = [
+        Math.max(0, baseBreakdown[0] + variance1),
+        Math.max(0, baseBreakdown[1] + variance2),
+        Math.max(0, 100 - (baseBreakdown[0] + variance1) - (baseBreakdown[1] + variance2))
+    ];
+
+    return [
+        { name: 'Productive Usage', value: finalBreakdown[0], color: '#10b981' }, 
+        { name: 'Idle Usage', value: finalBreakdown[1], color: '#f59e0b' },
+        { name: 'Wastage', value: finalBreakdown[2], color: '#ef4444' },
+    ];
 };
 
-export const historicalData = generateHistoricalData();
+const generateHeatmap = (scenarioType) => {
+    return [
+        { room: '101', hours: Array.from({length: 12}, () => Math.floor(Math.random() * (scenarioType === 'WEEKEND' ? 30 : 100))) },
+        { room: '102', hours: Array.from({length: 12}, () => Math.floor(Math.random() * (scenarioType === 'HIGH_LOAD' ? 100 : 80))) },
+        { room: 'Lab', hours: Array.from({length: 12}, () => Math.floor(Math.random() * (scenarioType === 'LEAKAGE' ? 90 : 60))) }, 
+        { room: '301', hours: Array.from({length: 12}, () => Math.floor(Math.random() * 90)) }, 
+        { room: '401', hours: Array.from({length: 12}, () => Math.floor(Math.random() * 40)) }, 
+    ];
+};
+
+// --- FETCH FUNCTIONS ---
+
+export const fetchDailyStats = async (dateKey) => {
+    try {
+        console.log(`Fetching stats for ${dateKey}`);
+        // Try to get from Supabase
+        const { data, error } = await supabase
+            .from('daily_stats')
+            .select(`
+                *,
+                hourly_trends(time, energy),
+                block_consumption(block_name, consumption),
+                waste_events(issue, risk, details)
+            `)
+            .eq('date', dateKey)
+            .maybeSingle(); 
+
+        if (error) {
+            console.warn(`Supabase fetch error for ${dateKey}`, error);
+            return null;
+        }
+
+        if (!data || !data.total_consumption) {
+             console.log(`No data or zero consumption for ${dateKey}, falling back.`);
+             return null;
+        }
+
+        // Format to match original structure
+        // Safety check for arrays
+        const trends = Array.isArray(data.hourly_trends) ? data.hourly_trends.map(t => ({...t, energy: t.energy})) : [];
+        const blocks = Array.isArray(data.block_consumption) ? data.block_consumption.map(b => ({ block: b.block_name, consumption: b.consumption })) : [];
+        const wasteEvents = data.waste_events || [];
+
+        const scenario = data.scenario || 'NORMAL';
+
+        return {
+            date: data.date,
+            scenario: scenario,
+            totalConsumption: data.total_consumption ?? 0, // Default to 0 if null
+            trends,
+            blocks,
+            wasteEvents,
+            usageBreakdown: generateUsageBreakdown(scenario),
+            heatmap: generateHeatmap(scenario)
+        };
+    } catch (e) {
+        console.error("Critical error in fetchDailyStats", e);
+        return null; // Return null so components fallback to mock
+    }
+};
+
+export const fetchRoomStatus = async () => {
+    try {
+        const { data, error } = await supabase.from('room_status').select('*');
+        if(error) {
+            console.error("Room fetch error", error);
+            return [];
+        }
+        return data || [];
+    } catch (e) {
+        console.error("fetchRoomStatus crashed", e);
+        return [];
+    }
+};
+
+export const fetchRecommendations = async () => {
+    try {
+        const { data, error } = await supabase.from('recommendations').select('*');
+        if(error) {
+             console.error("Recommendations fetch error", error);
+             return [];
+        }
+        return data || [];
+    } catch (e) {
+        console.error("fetchRecommendations crashed", e);
+        return [];
+    }
+}
+
+// --- LEGACY EXPORTS (Restored for Backward Compatibility) ---
+// Use defensive generation to prevent module-level crashes
+
+export { generateHistoricalData };
+
+let legacyData = {};
+try {
+    // Wrap in try-catch to prevent app crash if generator fails
+    legacyData = generateHistoricalData() || {};
+} catch (e) {
+    console.error("generateHistoricalData crashed during module calc", e);
+}
+
+export const historicalData = legacyData;
+
+const defaultData = { trends: [], blocks: [] };
+// Ensure we always export a valid object structure, even if empty
+export const currentDayData = (legacyData && (legacyData[todayKey] || Object.values(legacyData)[0])) || defaultData;
+
+// Fallback exports for existing components
+export const energyTrendData = currentDayData.trends || [];
+export const blockConsumptionData = currentDayData.blocks || [];

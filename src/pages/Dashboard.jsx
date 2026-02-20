@@ -8,6 +8,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import StatCard from '../components/StatCard';
 import { getMockData } from '../data/mockData';
+import { fetchDailyStats } from '../data/historicalData';
 import { useDate } from '../context/DateContext';
 
 gsap.registerPlugin(useGSAP);
@@ -15,54 +16,102 @@ gsap.registerPlugin(useGSAP);
 const Dashboard = () => {
   const containerRef = useRef(null);
   const { selectedDate } = useDate();
-  const dayData = getMockData(selectedDate);
   
+  const [dayData, setDayData] = useState(null);
   const [stats, setStats] = useState({
-    consumption: dayData.totalConsumption,
-    activeRooms: 45,
-    savedEnergy: 18.5
+    consumption: 0,
+    activeRooms: 0,
+    savedEnergy: 0
   });
 
   useEffect(() => {
-    // Update stats whenever dayData changes (i.e. date changes)
-    setStats({
-        consumption: dayData.totalConsumption,
-        activeRooms: dayData.scenario === 'WEEKEND' ? 12 : 85 + Math.floor(Math.random()*10),
-        savedEnergy: +(10 + Math.random() * 8).toFixed(1)
-    });
-  }, [dayData]);
+    async function loadData() {
+        setDayData(null); // Reset / Loading state
+        try {
+            // Try Supabase first
+            let data = await fetchDailyStats(selectedDate);
+            
+            // Fallback to mock if missing (or error handled in fetchDailyStats returning null)
+            if (!data) {
+                console.log("Using fallback mock data for", selectedDate);
+                data = getMockData(selectedDate);
+            }
+
+            if (data) {
+                setDayData(data);
+                setStats({
+                    consumption: data.totalConsumption || 0,
+                    activeRooms: data.scenario === 'WEEKEND' ? 12 : 85 + Math.floor(Math.random()*10),
+                    savedEnergy: +(10 + Math.random() * 8).toFixed(1)
+                });
+            } else {
+                 console.error("No data available for date:", selectedDate);
+                 // Keep loading or show error? For now, dayData check handles return null.
+                 // We can force error boundary if critical.
+            }
+        } catch (err) {
+            console.error("Dashboard load error", err);
+            setDayData(getMockData(selectedDate)); // Safety net
+        }
+    }
+    loadData();
+  }, [selectedDate]);
 
   // Derived data for charts
-  const energyTrendData = dayData.trends;
-  const blockConsumptionData = dayData.blocks;
+  const energyTrendData = dayData?.trends || [];
+  const blockConsumptionData = dayData?.blocks || [];
 
   useGSAP(() => {
+     if (!dayData || !containerRef.current) return; 
+     
+     // Ensure elements exist before animating
+     const cards = containerRef.current.querySelectorAll('.gsap-stat-card');
+     const charts = containerRef.current.querySelectorAll('.gsap-chart');
+     
+     if (cards.length === 0 && charts.length === 0) return;
+
      const tl = gsap.timeline();
-     tl.fromTo(".gsap-stat-card", 
-        { y: 30, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: "power3.out"
-        }
-     )
-     .fromTo(".gsap-chart", 
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: "power2.out"
-        }, "-=0.4");
-  }, { scope: containerRef, dependencies: [selectedDate] }); // Re-animate on date switch? Maybe too distracting. Let's keep one-time or subtle.
+     
+     if (cards.length > 0) {
+         tl.fromTo(cards, 
+            { y: 30, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              stagger: 0.1,
+              ease: "power3.out"
+            }
+         );
+     }
+// ... keeping rest of animation logic implicitly via if(!dayData) check above effectively, 
+// but we need to return early if loading.
+
+     if (charts.length > 0) {
+         tl.fromTo(charts, 
+            { y: 40, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              stagger: 0.2,
+              ease: "power2.out" /* , delay: 0 */ // Removing relative delay if cards didn't run? 
+            }, cards.length > 0 ? "-=0.4" : 0);
+     }
+  }, { scope: containerRef, dependencies: [dayData, selectedDate] });
   // Actually, re-animating on date change is cool.
 
   // No separate interval needed for mock simulation if we are driving by date selection, 
   // but we can keep a small "live" jitter if it's the current date. 
   // For now, let's keep it simple and static per day.
+
+  if (!dayData) {
+      return (
+          <div className="flex items-center justify-center h-96">
+              <div className="text-[rgb(var(--text-muted))] animate-pulse">Loading Energy Data...</div>
+          </div>
+      );
+  }
 
   return (
     <div ref={containerRef} className="space-y-6">
@@ -105,7 +154,7 @@ const Dashboard = () => {
         <div className="gsap-stat-card">
           <StatCard 
             title="Highest Consuming" 
-            value={dayData.blocks.reduce((max, block) => max.consumption > block.consumption ? max : block).block}
+            value={dayData.blocks.length > 0 ? dayData.blocks.reduce((max, block) => max.consumption > block.consumption ? max : block).block : "N/A"}
             unit=""
             icon={AlertTriangle}
             trend="up"
@@ -121,7 +170,7 @@ const Dashboard = () => {
         {/* Line Chart */}
         <div className="gsap-chart bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg">
           <h3 className="text-lg font-bold text-[rgb(var(--text-main))] mb-4">Energy Consumption Trend <span className="text-[rgb(var(--text-muted))] text-sm font-normal">({selectedDate})</span></h3>
-          <div className="h-80">
+          <div className="h-64 md:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart key={selectedDate} data={energyTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />
@@ -146,8 +195,8 @@ const Dashboard = () => {
 
         {/* Bar Chart */}
         <div className="gsap-chart bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg">
-          <h3 className="text-lg font-bold text-[rgb(var(--text-main))] mb-4">Consumption by Block <span className="text-[rgb(var(--text-muted))] text-sm font-normal">({dayData.scenario.replace('_', ' ')})</span></h3>
-          <div className="h-80">
+          <h3 className="text-lg font-bold text-[rgb(var(--text-main))] mb-4">Consumption by Block <span className="text-[rgb(var(--text-muted))] text-sm font-normal">({(dayData.scenario || '').replace('_', ' ')})</span></h3>
+          <div className="h-64 md:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart key={selectedDate} data={blockConsumptionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" vertical={false} />

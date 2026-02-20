@@ -9,11 +9,11 @@ const Notifications = () => {
 
   return (
     <div className="max-w-4xl mx-auto animate-fade-in p-6">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
             <button 
                 onClick={() => navigate(-1)}
-                className="p-2 rounded-lg bg-[rgb(var(--bg-input))] text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text-main))] transition-colors"
+                className="p-2 rounded-lg bg-[rgb(var(--bg-input))] text-[rgb(var(--text-muted))] hover:text-[rgb(var(--text-main))] transition-colors shrink-0"
             >
                 <ArrowLeft size={20} />
             </button>
@@ -26,16 +26,16 @@ const Notifications = () => {
             </div>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex gap-3 w-full md:w-auto">
             <button 
                 onClick={markAllAsRead}
-                className="px-4 py-2 text-sm font-medium text-[rgb(var(--text-main))] bg-[rgb(var(--bg-input))] rounded-lg hover:bg-opacity-80 transition-all"
+                className="flex-1 md:flex-none px-4 py-2 text-sm font-medium text-[rgb(var(--text-main))] bg-[rgb(var(--bg-input))] rounded-lg hover:bg-opacity-80 transition-all text-center"
             >
                 Mark all read
             </button>
             <button 
                 onClick={clearNotifications}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
             >
                 <Trash2 size={16} />
                 Clear All

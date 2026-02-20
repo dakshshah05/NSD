@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { recommendationsData, getMockData } from '../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { fetchRecommendations, fetchDailyStats } from '../data/historicalData';
 import RecommendationCard from '../components/RecommendationCard';
 import { Sparkles, Check, RefreshCw, Loader2, Calendar } from 'lucide-react';
 import { analyzeEnergyData } from '../services/gemini';
@@ -7,13 +7,21 @@ import { useNotifications } from '../context/NotificationContext';
 import { useDate } from '../context/DateContext';
 
 const Recommendations = () => {
-  const [recommendations, setRecommendations] = useState(recommendationsData);
+  const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [aiSummary, setAiSummary] = useState(null);
   const [toast, setToast] = useState(null);
   
   const { selectedDate } = useDate();
   const { addNotification } = useNotifications();
+
+  useEffect(() => {
+      async function load() {
+          const data = await fetchRecommendations();
+          setRecommendations(data || []);
+      }
+      load();
+  }, []); // Initial load of static recommendations (or could depend on date if table had date)
 
   const handleApply = (id) => {
     const rec = recommendations.find(r => r.id === id);
@@ -33,7 +41,7 @@ const Recommendations = () => {
     
     try {
         // Get context for specific date safely
-        const dayData = getMockData(selectedDate);
+        const dayData = await fetchDailyStats(selectedDate);
         
         // Prepare context
         const context = {

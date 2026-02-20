@@ -1,15 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip as ReTooltip,
   ComposedChart, Line, Area, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
 import { getMockData } from '../data/mockData';
+import { fetchDailyStats } from '../data/historicalData';
 import { useDate } from '../context/DateContext';
 import { AlertTriangle, TrendingUp, Info } from 'lucide-react';
 
 const Analytics = () => {
   const { selectedDate } = useDate();
-  const dayData = getMockData(selectedDate);
+  const [dayData, setDayData] = useState(null);
+
+  React.useEffect(() => {
+      async function load() {
+          setDayData(null);
+          let data = await fetchDailyStats(selectedDate);
+          if (!data) data = getMockData(selectedDate); // Fallback
+          setDayData(data);
+      }
+      load();
+  }, [selectedDate]);
+
+  if (!dayData) return <div className="p-10 text-center opacity-50">Loading Analytics...</div>;
   
   // Dynamic Data
   const usageBreakdown = dayData.usageBreakdown || [
@@ -88,7 +101,7 @@ const Analytics = () => {
                    <p className="text-xs text-[rgb(var(--text-muted))]">Correlation for {selectedDate} ({dayData.scenario})</p>
                </div>
                <div className="bg-[rgb(var(--bg-input))] px-3 py-1 rounded-full text-xs text-emerald-400 border border-[rgb(var(--border))]">
-                   {dayData.totalConsumption.toLocaleString()} kWh Total
+                   {(dayData.totalConsumption || 0).toLocaleString()} kWh Total
                </div>
            </div>
            

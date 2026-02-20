@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
-import { roomStatusData } from '../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { fetchRoomStatus } from '../data/historicalData';
 import ControlCard from '../components/ControlCard';
 import { Sliders } from 'lucide-react';
 
 const Controls = () => {
   // Initialize state with a new property 'automation' added to each room
-  const [rooms, setRooms] = useState(roomStatusData.map(r => ({ ...r, automation: true })));
+  const [rooms, setRooms] = useState([]);
+
+  useEffect(() => {
+      async function load() {
+          const data = await fetchRoomStatus();
+          if (data) {
+              setRooms(data.map(r => ({ ...r, automation: true })));
+          }
+      }
+      load();
+  }, []);
 
   const handleUpdate = (id, updates) => {
     setRooms(prevRooms => 

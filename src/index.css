@@ -2,33 +2,33 @@
 
 @layer base {
   :root {
-  /* Dark Mode (Default) */
-  --bg-main: 2 6 23; /* slate-950 */
-  --bg-card: 15 23 42; /* slate-900 */
-  --bg-input: 30 41 59; /* slate-800 */
-  --border: 30 41 59; /* slate-800 */
+    /* Dark Mode (Default) */
+    --bg-main: 2 6 23; /* slate-950 */
+    --bg-card: 15 23 42; /* slate-900 */
+    --bg-input: 30 41 59; /* slate-800 */
+    --border: 30 41 59; /* slate-800 */
 
-  --text-main: 255 255 255; /* white */
-  --text-sec: 226 232 240; /* slate-200 */
-  --text-muted: 148 163 184; /* slate-400 */
+    --text-main: 255 255 255; /* white */
+    --text-sec: 226 232 240; /* slate-200 */
+    --text-muted: 148 163 184; /* slate-400 */
 
-  --accent: 52 211 153; /* emerald-400 */
-  --accent-dark: 16 185 129; /* emerald-500 */
+    --accent: 52 211 153; /* emerald-400 */
+    --accent-dark: 16 185 129; /* emerald-500 */
 
-  color-scheme: dark;
+    color-scheme: dark;
   }
 }
 
 .light {
   /* Light Mode (Green/Yellow Theme) */
-  --bg-main: 255 251 177;   /* FFFBB1 (Cream) */
-  --bg-card: 248 250 220;   /* Light variation of cream */
-  --bg-input: 216 233 131;  /* D8E983 (Lime) - Inputs/Borders */
-  --border: 174 184 119;    /* AEB877 (Olive) - Borders */
-  
-  --text-main: 0 0 0;       /* BLACK */
-  --text-sec: 30 30 30;     /* Dark Grey */
-  --text-muted: 71 85 105;  /* Slate 600 */
+  --bg-main: 255 251 177; /* FFFBB1 (Cream) */
+  --bg-card: 248 250 220; /* Light variation of cream */
+  --bg-input: 216 233 131; /* D8E983 (Lime) - Inputs/Borders */
+  --border: 174 184 119; /* AEB877 (Olive) - Borders */
+
+  --text-main: 0 0 0; /* BLACK */
+  --text-sec: 30 30 30; /* Dark Grey */
+  --text-muted: 71 85 105; /* Slate 600 */
 
   --accent: 85 107 47; /* Dark Olive Green for accents */
   --accent-dark: 60 76 30; /* Darker Olive */
@@ -42,6 +42,13 @@ body {
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
+
+  /* Safe Area Insets for Mobile */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  min-height: 100vh;
 }
 
 @layer utilities {
