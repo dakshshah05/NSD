@@ -2,68 +2,43 @@
 
 @layer base {
   :root {
-    /* Dark Mode (Default) */
-    --bg-main: 2 6 23; /* slate-950 */
-    --bg-card: 15 23 42; /* slate-900 */
-    --bg-input: 30 41 59; /* slate-800 */
-    --border: 30 41 59; /* slate-800 */
-
-    --text-main: 255 255 255; /* white */
-    --text-sec: 226 232 240; /* slate-200 */
-    --text-muted: 148 163 184; /* slate-400 */
-
-    --accent: 52 211 153; /* emerald-400 */
-    --accent-dark: 16 185 129; /* emerald-500 */
-
+    --bg-main: 2 6 23;
+    --bg-card: 15 23 42;
+    --bg-input: 30 41 59;
+    --border: 30 41 59;
+    --text-main: 255 255 255;
+    --text-sec: 226 232 240;
+    --text-muted: 148 163 184;
+    --accent: 99 102 241; /* Indigo 500 */
+    --accent-dark: 79 70 229; /* Indigo 600 */
     color-scheme: dark;
   }
 }
 
-.light {
-  /* Light Mode (Green/Yellow Theme) */
-  --bg-main: 255 251 177; /* FFFBB1 (Cream) */
-  --bg-card: 248 250 220; /* Light variation of cream */
-  --bg-input: 216 233 131; /* D8E983 (Lime) - Inputs/Borders */
-  --border: 174 184 119; /* AEB877 (Olive) - Borders */
-
-  --text-main: 0 0 0; /* BLACK */
-  --text-sec: 30 30 30; /* Dark Grey */
-  --text-muted: 71 85 105; /* Slate 600 */
-
-  --accent: 85 107 47; /* Dark Olive Green for accents */
-  --accent-dark: 60 76 30; /* Darker Olive */
-
-  color-scheme: light;
-}
-
 body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
   background-color: rgb(var(--bg-main));
   color: rgb(var(--text-main));
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-
-  /* Safe Area Insets for Mobile */
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+  transition: background-color 0.3s ease, color 0.3s ease;
   min-height: 100vh;
 }
 
 @layer utilities {
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  .animate-spin-slow {
-    animation: spin-slow 3s linear infinite;
+  .animate-shimmer {
+    animation: shimmer 1.5s infinite;
+  }
+  .animate-scale-up {
+    animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -71,11 +46,19 @@ body {
   }
 }
 
-@keyframes spin-slow {
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes scaleUp {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
