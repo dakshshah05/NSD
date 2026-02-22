@@ -51,14 +51,11 @@ const Settings = () => {
   const { user, signOut } = useAuth();
 
   // Modal States
-  const [show2FA, setShow2FA] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   
   // Loading states for actions
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isVerifying2FA, setIsVerifying2FA] = useState(false);
-  const [authCode, setAuthCode] = useState('');
 
   // DB Data States
   const [logs, setLogs] = useState([]);
@@ -86,17 +83,6 @@ const Settings = () => {
 
   const handleSave = () => {
       addNotification('Success', 'System configuration saved successfully.');
-  };
-
-  const handleVerify2FA = () => {
-      setIsVerifying2FA(true);
-      setTimeout(() => {
-          setIsVerifying2FA(false);
-          updateSetting('twoFactor', true);
-          setShow2FA(false);
-          setAuthCode('');
-          addNotification('Success', 'Two-Factor Authentication enabled.');
-      }, 1500);
   };
 
   const handleDeleteAccount = async () => {
@@ -159,20 +145,6 @@ const Settings = () => {
       <SettingSection title="Account & Security" icon={Shield}>
          <div className="flex items-center justify-between py-2 border-b border-[rgb(var(--border))]/50">
             <div>
-               <p className="text-sm font-medium text-[rgb(var(--text-sec))]">Two-Factor Authentication</p>
-               <p className="text-xs text-[rgb(var(--text-muted))]">
-                   {settings.twoFactor ? 'Active and securing your account' : 'Enhance security with MFA'}
-               </p>
-            </div>
-            <button 
-                onClick={() => settings.twoFactor ? updateSetting('twoFactor', false) : setShow2FA(true)}
-                className={`text-sm font-medium ${settings.twoFactor ? 'text-red-400 hover:text-red-300' : 'text-emerald-400 hover:text-emerald-300'}`}
-            >
-                {settings.twoFactor ? 'Disable' : 'Configure'}
-            </button>
-         </div>
-         <div className="flex items-center justify-between py-2">
-            <div>
                <p className="text-sm font-medium text-[rgb(var(--text-sec))]">API Access Logs</p>
                <p className="text-xs text-[rgb(var(--text-muted))]">Monitor recent authentications</p>
             </div>
@@ -206,51 +178,6 @@ const Settings = () => {
             <span>Save Preferences</span>
          </button>
       </div>
-
-      {/* 2FA Modal Dialog */}
-      {show2FA && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-           <div className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 w-full max-w-md shadow-2xl animate-scale-up">
-              <div className="flex justify-between items-center mb-6">
-                 <h3 className="text-xl font-bold text-[rgb(var(--text-main))] flex items-center gap-2">
-                     <Key size={24} className="text-emerald-400" />
-                     Setup 2FA
-                 </h3>
-                 <button onClick={() => setShow2FA(false)} className="text-[rgb(var(--text-muted))] hover:text-white">
-                     <X size={20} />
-                 </button>
-              </div>
-              <p className="text-sm text-[rgb(var(--text-muted))] mb-4">
-                  Scan the mock QR code below with your Authenticator app and enter the 6-digit code.
-              </p>
-              
-              <div className="bg-white p-4 rounded-xl flex justify-center w-48 h-48 mx-auto mb-6">
-                 {/* Fake QR Code */}
-                 <div className="w-full h-full border-4 border-dashed border-slate-300 flex items-center justify-center">
-                     <span className="text-slate-400 text-sm font-medium">Mock QR</span>
-                 </div>
-              </div>
-
-              <div className="space-y-4">
-                  <input 
-                      type="text" 
-                      maxLength={6}
-                      placeholder="000000"
-                      value={authCode}
-                      onChange={(e) => setAuthCode(e.target.value.replace(/\D/g, ''))}
-                      className="w-full text-center text-2xl tracking-widest font-mono bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-[rgb(var(--text-main))]"
-                  />
-                  <button 
-                      onClick={handleVerify2FA}
-                      disabled={authCode.length !== 6 || isVerifying2FA}
-                      className="w-full flex justify-center items-center py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                      {isVerifying2FA ? <Loader2 className="animate-spin" size={20} /> : 'Verify & Enable'}
-                  </button>
-              </div>
-           </div>
-        </div>
-      )}
 
       {/* API Logs Modal Dialog */}
       {showLogs && (
