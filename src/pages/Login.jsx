@@ -107,7 +107,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden font-inter selection:bg-indigo-500/30">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden font-inter selection:bg-emerald-500/30">
       <ThreeBackground />
       
       {/* Login Card Container */}
@@ -115,33 +115,39 @@ const Login = () => {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-10 w-full max-w-md p-[1px] rounded-[2.5rem] bg-gradient-to-br from-indigo-500/20 via-transparent to-purple-500/20 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+        className="relative z-10 w-full max-w-md p-[1px] rounded-[2.5rem] bg-gradient-to-br from-emerald-500/20 via-transparent to-emerald-500/10 shadow-[0_0_50px_rgba(0,0,0,0.15)]"
       >
-        <div className="w-full h-full p-10 rounded-[2.5rem] bg-slate-950/40 backdrop-blur-[30px] border border-white/5 relative overflow-hidden group">
+        <div 
+          style={{ 
+            backgroundColor: 'rgba(var(--glass-bg), var(--glass-opacity))',
+            borderColor: 'rgba(var(--glass-border), var(--glass-border-opacity))'
+          }}
+          className="w-full h-full p-10 rounded-[2.5rem] backdrop-blur-[30px] border relative overflow-hidden group"
+        >
           
           {/* Animated Glow Effect */}
-          <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.03),transparent_50%)] animate-pulse pointer-events-none" />
+          <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_center,rgba(var(--accent),0.03),transparent_50%)] animate-pulse pointer-events-none" />
 
           <div className="text-center mb-10 relative">
             <motion.div 
               initial={{ rotate: -10, scale: 0.8 }}
               animate={{ rotate: 0, scale: 1 }}
               transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
-              className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/30 group-hover:border-indigo-400/50 transition-colors shadow-[0_0_30px_rgba(99,102,241,0.2)]"
+              className="w-20 h-20 bg-[rgb(var(--accent))]/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[rgb(var(--accent))]/30 group-hover:border-[rgb(var(--accent))]/50 transition-colors shadow-[0_0_30px_rgba(var(--accent),0.1)]"
             >
-              <LogIn className="w-10 h-10 text-indigo-400 group-hover:text-indigo-300 transition-all filter drop-shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
+              <LogIn className="w-10 h-10 text-[rgb(var(--accent))] group-hover:text-[rgb(var(--accent-dark))] transition-all filter drop-shadow-[0_0_8px_rgba(var(--accent),0.4)]" />
             </motion.div>
             
             <motion.h2 
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-4xl font-black text-white tracking-tight mb-2"
+              className="text-4xl font-black text-[rgb(var(--text-main))] tracking-tight mb-2"
             >
-              System <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Entry</span>
+              System <span className="text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--accent))] to-emerald-600">Entry</span>
             </motion.h2>
-            <p className="text-slate-400 font-medium tracking-wide flex items-center justify-center gap-2">
-               Initialize Session <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+            <p className="text-[rgb(var(--text-muted))] font-medium tracking-wide flex items-center justify-center gap-2">
+               Initialize Session <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--accent))] animate-pulse" />
             </p>
           </div>
 
@@ -151,7 +157,7 @@ const Login = () => {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold p-4 rounded-2xl mb-8 flex items-center gap-3"
+                className="bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-bold p-4 rounded-2xl mb-8 flex items-center gap-3"
               >
                 <div className="w-1 h-1 rounded-full bg-red-400 animate-ping" />
                 {error}
@@ -168,33 +174,41 @@ const Login = () => {
             >
               <div className="group relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-indigo-400/50 group-focus-within:text-indigo-400 transition-colors" />
+                  <Mail className="h-5 w-5 text-[rgb(var(--accent))]/50 group-focus-within:text-[rgb(var(--accent))] transition-colors" />
                 </div>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 border border-white/5 rounded-2xl bg-white/[0.03] text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 sm:text-sm transition-all hover:bg-white/[0.05]"
+                  style={{ 
+                    backgroundColor: 'rgba(var(--input-bg), var(--input-opacity))',
+                    borderColor: 'rgba(var(--glass-border), var(--glass-border-opacity))'
+                  }}
+                  className="block w-full pl-12 pr-4 py-4 border rounded-2xl text-[rgb(var(--text-main))] placeholder-[rgb(var(--text-muted))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/30 focus:border-[rgb(var(--accent))]/50 sm:text-sm transition-all hover:bg-[rgb(var(--input-bg))]/[0.08]"
                   placeholder="Network ID (Email)"
                 />
               </div>
               
               <div className="group relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-indigo-400/50 group-focus-within:text-indigo-400 transition-colors" />
+                  <Lock className="h-5 w-5 text-[rgb(var(--accent))]/50 group-focus-within:text-[rgb(var(--accent))] transition-colors" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-12 pr-12 py-4 border border-white/5 rounded-2xl bg-white/[0.03] text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 sm:text-sm transition-all hover:bg-white/[0.05]"
+                  style={{ 
+                    backgroundColor: 'rgba(var(--input-bg), var(--input-opacity))',
+                    borderColor: 'rgba(var(--glass-border), var(--glass-border-opacity))'
+                  }}
+                  className="block w-full pl-12 pr-12 py-4 border rounded-2xl text-[rgb(var(--text-main))] placeholder-[rgb(var(--text-muted))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/30 focus:border-[rgb(var(--accent))]/50 sm:text-sm transition-all hover:bg-[rgb(var(--input-bg))]/[0.08]"
                   placeholder="Security Key"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-indigo-400 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[rgb(var(--text-muted))] hover:text-[rgb(var(--accent))] transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -203,11 +217,11 @@ const Login = () => {
             </motion.div>
 
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(99,102,241,0.4)" }}
+              whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(var(--accent),0.3)" }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-4 px-4 border border-indigo-500/30 text-base font-bold rounded-2xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-xl"
+              className="group relative w-full flex justify-center py-4 px-4 border border-[rgb(var(--accent))]/30 text-base font-bold rounded-2xl text-white bg-gradient-to-r from-[rgb(var(--accent-dark))] to-emerald-600 hover:from-[rgb(var(--accent))] hover:to-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:animate-shimmer" />
               <span className="flex items-center gap-2">
@@ -223,9 +237,9 @@ const Login = () => {
             transition={{ delay: 0.8 }}
             className="mt-10 text-center"
           >
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium text-[rgb(var(--text-muted))]">
               New to the system?{' '}
-              <Link to="/register" className="text-indigo-400 hover:text-indigo-300 transition-colors hover:underline decoration-2 underline-offset-4">
+              <Link to="/register" className="text-[rgb(var(--accent))] hover:text-[rgb(var(--accent-dark))] transition-colors hover:underline decoration-2 underline-offset-4">
                 Register Credentials
               </Link>
             </p>

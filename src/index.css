@@ -11,6 +11,16 @@
     --text-muted: 148 163 184; 
     --accent: 52 211 153; /* Emerald 400 */
     --accent-dark: 16 185 129; /* Emerald 500 */
+    
+    /* Semantic UI Variables (Dark) */
+    --glass-bg: 2 6 23; /* slate-950 */
+    --glass-border: 255 255 255;
+    --glass-opacity: 0.4;
+    --glass-border-opacity: 0.05;
+    --input-bg: 255 255 255;
+    --input-opacity: 0.03;
+    --text-contrast: 226 232 240;
+    
     color-scheme: dark;
   }
 }
@@ -22,12 +32,21 @@
   --bg-input: 216 233 131; /* D8E983 (Lime) - Inputs/Borders */
   --border: 174 184 119; /* AEB877 (Olive) - Borders */
 
-  --text-main: 0 0 0; /* BLACK */
-  --text-sec: 30 30 30; /* Dark Grey */
-  --text-muted: 71 85 105; /* Slate 600 */
+  --text-main: 15 23 42; /* slate-900 for high contrast */
+  --text-sec: 30 41 59; /* slate-800 */
+  --text-muted: 51 65 85; /* slate-700 */
 
-  --accent: 85 107 47; /* Dark Olive Green for accents */
-  --accent-dark: 60 76 30; /* Darker Olive */
+  --accent: 22 163 74; /* emerald-600 */
+  --accent-dark: 21 128 61; /* emerald-700 */
+
+  /* Semantic UI Variables (Light) */
+  --glass-bg: 255 255 255;
+  --glass-border: 22 163 74;
+  --glass-opacity: 0.6;
+  --glass-border-opacity: 0.15;
+  --input-bg: 0 0 0;
+  --input-opacity: 0.05;
+  --text-contrast: 15 23 42;
 
   color-scheme: light;
 }
