@@ -6,14 +6,21 @@ import {
 import { getMockData } from '../data/mockData';
 import { fetchDailyStats, checkScheduleAnomalies } from '../data/historicalData';
 import { useDate } from '../context/DateContext';
-import { AlertTriangle, TrendingUp, Info, Clock, Power } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
+import { supabase } from '../lib/supabaseClient';
+import emailjs from '@emailjs/browser';
+import { AlertTriangle, TrendingUp, Info, Clock, Power, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Analytics = () => {
   const { selectedDate } = useDate();
+  const { user } = useAuth();
+  const { addNotification } = useNotifications();
   const [dayData, setDayData] = useState(null);
   const [anomalies, setAnomalies] = useState([]);
   const [loadingAnomalies, setLoadingAnomalies] = useState(true);
+  const [isReporting, setIsReporting] = useState({});
 
   React.useEffect(() => {
       async function load() {
@@ -37,6 +44,45 @@ const Analytics = () => {
       const interval = setInterval(loadAnomalies, 60000);
       return () => clearInterval(interval);
   }, []);
+
+  const handleAnomalyReport = async (anomaly) => {
+      const anomalyId = anomaly.id;
+      setIsReporting(prev => ({ ...prev, [anomalyId]: true }));
+
+      try {
+          // 1. Award 50 points to the user
+          if (user?.id) {
+              await supabase.rpc('add_green_points', { user_id: user.id, points_to_add: 50 });
+          }
+
+          // 2. Send email to admin
+          const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+          const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+          const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+          if (serviceId && templateId && publicKey) {
+              await emailjs.send(
+                  serviceId,
+                  templateId,
+                  {
+                      to_email: 'dakshshah215@gmail.com',
+                      subject: `ANOMALY REPORT: ${anomaly.room_name}`,
+                      message: `A student has reported a schedule anomaly.\n\nRoom: ${anomaly.room_name}\nType: ${anomaly.type}\nPower Draw: ${anomaly.power}W\nDetails: ${anomaly.details}\n\nReported by: ${user?.email || 'Anonymous Student'}`,
+                      date: new Date().toLocaleDateString(),
+                      filename: 'N/A'
+                  },
+                  publicKey
+              );
+          }
+
+          addNotification('Report Sent', `Successfully reported anomaly in ${anomaly.room_name}. +50 points awarded!`, 'success');
+      } catch (error) {
+          console.error("Failed to report anomaly:", error);
+          addNotification('Error', 'Failed to send report. Please try again later.', 'error');
+      } finally {
+          setIsReporting(prev => ({ ...prev, [anomalyId]: false }));
+      }
+  };
 
   if (!dayData) return <div className="p-10 text-center opacity-50">Loading Analytics...</div>;
   
@@ -192,10 +238,21 @@ const Analytics = () => {
                                  {anomaly.details}
                              </div>
                          </div>
-                         <button className="mt-4 ml-2 w-full py-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-sm font-medium transition-colors border border-red-500/20 hover:border-red-500">
-                             Issue Remote Shutoff
+                         <button 
+                            onClick={() => handleAnomalyReport(anomaly)}
+                            disabled={isReporting[anomaly.id]}
+                            className="mt-4 ml-2 w-full py-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-sm font-medium transition-colors border border-red-500/20 hover:border-red-500 flex items-center justify-center gap-2"
+                         >
+                             {isReporting[anomaly.id] ? (
+                                 <span className="animate-pulse">Reporting...</span>
+                             ) : (
+                                 <>
+                                     <Send size={14} />
+                                     Send report
+                                 </>
+                             )}
                          </button>
-                     </motion.div>
+                      </motion.div>
                  ))}
              </div>
          )}
