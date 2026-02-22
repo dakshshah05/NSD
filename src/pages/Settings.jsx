@@ -53,6 +53,7 @@ const Settings = () => {
   // User Management State
   const [authorizedUsers, setAuthorizedUsers] = useState([]);
   const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState('student');
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -106,21 +107,27 @@ const Settings = () => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    if (!newEmail) return;
+    if (!newEmail || !newPassword) return;
     setIsAddingUser(true);
     
-    const { error } = await supabase
-      .from('user_roles')
-      .insert([{ email: newEmail.toLowerCase(), role: newRole }]);
+    try {
+      // Direct User Creation via Edge Function
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: { email: newEmail.toLowerCase(), password: newPassword, role: newRole }
+      });
 
-    if (error) {
-      addNotification('Error', 'Failed to authorize user. Maybe they already exist?');
-    } else {
-      addNotification('Success', `${newEmail} authorized as ${newRole}.`);
+      if (error) throw error;
+
+      addNotification('Success', `${newEmail} created successfully as ${newRole}.`);
       setNewEmail('');
+      setNewPassword('');
       fetchAuthorizedUsers();
+    } catch (err) {
+      console.error("Create User Error:", err);
+      addNotification('Error', err.message || 'Failed to create user. Ensure Edge Function is deployed.');
+    } finally {
+      setIsAddingUser(false);
     }
-    setIsAddingUser(false);
   };
 
   const handleRemoveUser = async (email) => {
@@ -166,35 +173,46 @@ const Settings = () => {
       {role === 'admin' && (
         <SettingSection title="User Access Management" icon={User}>
           <p className="text-sm text-[rgb(var(--text-muted))] mb-6">
-            Pre-authorize users and assign their roles before they register.
+            Create new user accounts directly. They can log in immediately with the password you set.
           </p>
           
-          <form onSubmit={handleAddUser} className="flex flex-col sm:flex-row gap-3 mb-8">
-            <input 
-              type="email" 
-              placeholder="User Email" 
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className="flex-1 bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              required
-            />
-            <select 
-              value={newRole}
-              onChange={(e) => setNewRole(e.target.value)}
-              className="bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="student">Student</option>
-              <option value="teacher">Teacher</option>
-              <option value="admin">Administrator</option>
-            </select>
+          <form onSubmit={handleAddUser} className="flex flex-col gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input 
+                type="email" 
+                placeholder="User Email" 
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className="flex-[2] bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                required
+              />
+              <input 
+                type="password" 
+                placeholder="Set Password" 
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="flex-1 bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                required
+              />
+              <select 
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value)}
+                className="bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              >
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
             <button 
               type="submit"
               disabled={isAddingUser}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all disabled:opacity-50"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 shadow-lg shadow-emerald-900/20"
             >
-              {isAddingUser ? 'Adding...' : 'Authorize User'}
+              {isAddingUser ? 'Creating Account...' : 'Create Account Now'}
             </button>
           </form>
+
 
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-[rgb(var(--text-muted))] uppercase tracking-wider">Authorized Access List</h4>
