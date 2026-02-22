@@ -10,7 +10,12 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Helper to fetch role from DB
-  const fetchUserRole = async (userId, email) => {
+  const fetchUserRole = async (currentUser) => {
+    if (!currentUser) return;
+    
+    const userId = currentUser.id;
+    const email = currentUser.email;
+
     // 1. HARDCODED OVERRIDES (Highest Priority)
     if (email === 'dakshshah215@gmail.com') {
       setUserRole('admin');
@@ -18,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     }
     
     try {
-      // 2. Lookup pre-authorization FIRST
+      // 2. Lookup pre-authorization FIRST (Whitelist)
       const { data: authorized } = await supabase
         .from('user_roles')
         .select('role')
@@ -32,11 +37,10 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .maybeSingle();
       
-      // 4. Lookup User Metadata (New: Catch roles from registration)
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      // 4. Lookup User Metadata (From Registration)
       const metaRole = currentUser?.user_metadata?.role;
 
-      // Determine the best role
+      // Determine the best role based on priority
       let finalRole = 'student';
       if (authorized) {
         finalRole = authorized.role;
@@ -46,10 +50,11 @@ export const AuthProvider = ({ children }) => {
         finalRole = profile.role;
       }
 
+      console.log(`Role detection for ${email}: Authorized=${authorized?.role}, Meta=${metaRole}, Profile=${profile?.role} -> Final=${finalRole}`);
+
       if (!profile && userId) {
         // 4a. Create profile if missing
-        // Use the metadata role if available, otherwise fallback to student
-        const initialRole = metaRole || finalRole || 'student';
+        const initialRole = finalRole;
         const displayName = email.split('@')[0].split('.')[0].charAt(0).toUpperCase() + email.split('@')[0].split('.')[0].slice(1);
         
         const { error: insertError } = await supabase.from('user_points').insert([{
@@ -62,8 +67,7 @@ export const AuthProvider = ({ children }) => {
         if (insertError) {
           console.error("Error creating user profile:", insertError);
         } else {
-          console.log(`Created profile for ${email} with role: ${initialRole} and name: ${displayName}`);
-          setUserRole(initialRole);
+          console.log(`Created profile for ${email} with role: ${initialRole}`);
         }
       } else if (profile && ( (authorized && profile.role !== authorized.role) || (metaRole && profile.role !== metaRole) )) {
         // 4b. UPDATE profile if authorization or metadata exists and differs from current role
@@ -74,10 +78,9 @@ export const AuthProvider = ({ children }) => {
           .eq('id', userId);
         console.log(`Updated role for ${email} to: ${roleToUpdate}`);
         finalRole = roleToUpdate;
-        setUserRole(finalRole);
-      } else if (profile) {
-        setUserRole(profile.role);
       }
+
+      setUserRole(finalRole);
 
     } catch (err) {
       console.error("Error syncing role:", err);
@@ -90,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) fetchUserRole(session.user.id, session.user.email);
+      if (session?.user) fetchUserRole(session.user);
       setLoading(false);
     });
 
@@ -101,7 +104,7 @@ export const AuthProvider = ({ children }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id, session.user.email);
+        fetchUserRole(session.user);
       } else {
         setUserRole('student');
       }
@@ -116,7 +119,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const response = await supabase.auth.signInWithPassword({ email, password });
     if (response.data?.user && !response.error) {
-       await fetchUserRole(response.data.user.id, response.data.user.email);
+       await fetchUserRole(response.data.user);
        // Log the sign in
        await supabase.from('api_logs').insert([{
            user_id: response.data.user.id,
