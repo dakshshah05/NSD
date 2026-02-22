@@ -2,30 +2,53 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Recycle, Trash2, CheckCircle2, XCircle, ArrowRight, Home } from 'lucide-react';
 
-const ITEMS = [
+const ITEMS_POOL = [
     { id: 1, name: 'Leaving AC at 18°C', good: false, explanation: 'ACs consume exponentially more power below 24°C.' },
     { id: 2, name: 'Using LED Bulbs', good: true, explanation: 'LEDs use 75% less energy than incandescent lighting.' },
     { id: 3, name: 'Washing clothes in Cold Water', good: true, explanation: 'Heating water accounts for 90% of a washing machine\'s energy.' },
     { id: 4, name: 'Running empty elevators', good: false, explanation: 'Elevator usage contributes to 5% of a tall building\'s load.' },
     { id: 5, name: 'Sleeping computer monitors', good: true, explanation: 'Monitor sleep modes are essential for reducing phantom load.' },
     { id: 6, name: 'Leaving Phone plugged in at 100%', good: false, explanation: 'Trickle charging wastes energy and damages battery life.' },
+    { id: 7, name: 'Keeping windows open while AC is on', good: false, explanation: 'Forces the AC compressor to work constantly, wasting massive power.' },
+    { id: 8, name: 'Using natural sunlight for dorms', good: true, explanation: 'Reduces dependency on electrical lighting during the day.' },
+    { id: 9, name: 'Leaving projector on after class', good: false, explanation: 'Projector bulbs draw high wattage and burn out faster when left idle.' },
+    { id: 10, name: 'Unplugging chargers not in use', good: true, explanation: 'Stops "vampire drain" from pulling trickle current.' },
+    { id: 11, name: 'Running dishwasher half-empty', good: false, explanation: 'Uses the same amount of water and heating energy as a full load.' },
+    { id: 12, name: 'Using smart power strips', good: true, explanation: 'Automatically cuts power to peripherals when the main device turns off.' },
+    { id: 13, name: 'Setting fridge temp too low', good: false, explanation: 'Fridges run longer cycles when set unnecessarily cold.' },
+    { id: 14, name: 'Using laptop instead of desktop', good: true, explanation: 'Laptops average 20W to 50W, while desktops use 100W to 300W.' },
 ];
+
+// Fisher-Yates shuffle
+const shuffleArray = (array) => {
+    let result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+};
 
 const EnergySorter = ({ onBack }) => {
     const [gameState, setGameState] = useState('menu'); // menu, playing, gameover
     const [currentIndex, setCurrentIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [feedbacks, setFeedbacks] = useState([]);
+    const [currentItems, setCurrentItems] = useState([]);
 
     const startGame = () => {
         setGameState('playing');
         setCurrentIndex(0);
         setScore(0);
         setFeedbacks([]);
+        
+        // Pick 6 random items for this round
+        const shuffled = shuffleArray(ITEMS_POOL);
+        setCurrentItems(shuffled.slice(0, 6));
     };
 
     const handleSort = (isEcoFriendly) => {
-        const item = ITEMS[currentIndex];
+        const item = currentItems[currentIndex];
         const correct = isEcoFriendly === item.good;
         
         if (correct) {
@@ -34,7 +57,7 @@ const EnergySorter = ({ onBack }) => {
 
         setFeedbacks(prev => [...prev, { item, correct }]);
 
-        if (currentIndex < ITEMS.length - 1) {
+        if (currentIndex < currentItems.length - 1) {
             setCurrentIndex(i => i + 1);
         } else {
             setTimeout(() => setGameState('gameover'), 500);
@@ -72,23 +95,23 @@ const EnergySorter = ({ onBack }) => {
                     </div>
                 )}
 
-                {gameState === 'playing' && currentIndex < ITEMS.length && (
+                {gameState === 'playing' && currentIndex < currentItems.length && (
                     <div className="w-full max-w-sm">
                         <div className="flex justify-between w-full px-4 mb-4 text-sm font-bold opacity-50">
                             <span className="text-red-400 text-left w-1/3">Waster</span>
-                            <span className="text-center w-1/3">{currentIndex + 1} / {ITEMS.length}</span>
+                            <span className="text-center w-1/3">{currentIndex + 1} / {currentItems.length}</span>
                             <span className="text-emerald-400 text-right w-1/3">Eco-Friendly</span>
                         </div>
                         
                         <AnimatePresence mode="popLayout">
                             <motion.div
-                                key={currentIndex}
+                                key={currentItems[currentIndex].id}
                                 initial={{ opacity: 0, scale: 0.8, y: 50 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.8, y: -50 }}
                                 className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-10 text-center shadow-xl mb-8 aspect-square flex flex-col items-center justify-center"
                             >
-                                <h3 className="text-2xl font-bold text-white mb-2">{ITEMS[currentIndex].name}</h3>
+                                <h3 className="text-2xl font-bold text-white mb-2">{currentItems[currentIndex].name}</h3>
                             </motion.div>
                         </AnimatePresence>
 

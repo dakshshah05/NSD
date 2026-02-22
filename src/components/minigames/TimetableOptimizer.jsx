@@ -2,20 +2,52 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Check, X, Maximize2, Users, LayoutDashboard, Flag } from 'lucide-react';
 
-const CLASSES = [
-    { id: 'c1', name: 'CS101 Intro to Programming', size: 120, assignedRoom: null },
-    { id: 'c2', name: 'Advanced AI Seminar', size: 15, assignedRoom: null },
-    { id: 'c3', name: 'Physics Mechanics Lab', size: 45, assignedRoom: null },
-];
-
-const ROOMS = [
-    { id: 'r1', name: 'Main Auditorium', capacity: 200, energyCost: 'High' },
-    { id: 'r2', name: 'Standard Classroom', capacity: 50, energyCost: 'Medium' },
-    { id: 'r3', name: 'Conference Room', capacity: 20, energyCost: 'Low' },
+const SCENARIOS = [
+    {
+        id: 's1',
+        classes: [
+            { id: 'c1', name: 'CS101 Intro to Programming', size: 120, assignedRoom: null },
+            { id: 'c2', name: 'Advanced AI Seminar', size: 15, assignedRoom: null },
+            { id: 'c3', name: 'Physics Mechanics Lab', size: 45, assignedRoom: null },
+        ],
+        rooms: [
+            { id: 'r1', name: 'Main Auditorium', capacity: 200, energyCost: 'High' },
+            { id: 'r2', name: 'Standard Classroom', capacity: 50, energyCost: 'Medium' },
+            { id: 'r3', name: 'Conference Room', capacity: 20, energyCost: 'Low' },
+        ]
+    },
+    {
+        id: 's2',
+        classes: [
+            { id: 'c1', name: 'Web Dev Workshop', size: 35, assignedRoom: null },
+            { id: 'c2', name: 'Freshman Orientation', size: 250, assignedRoom: null },
+            { id: 'c3', name: 'Graduate Thesis Defense', size: 8, assignedRoom: null },
+        ],
+        rooms: [
+            { id: 'r1', name: 'Grand Hall', capacity: 300, energyCost: 'High' },
+            { id: 'r2', name: 'Meeting Room B', capacity: 15, energyCost: 'Low' },
+            { id: 'r3', name: 'Computer Lab 2', capacity: 40, energyCost: 'Medium' },
+        ]
+    },
+    {
+        id: 's3',
+        classes: [
+            { id: 'c1', name: 'Calculus III Tutorial', size: 25, assignedRoom: null },
+            { id: 'c2', name: 'Biology Dissection', size: 55, assignedRoom: null },
+            { id: 'c3', name: 'Guest Lecture: Elon Musk', size: 480, assignedRoom: null },
+        ],
+        rooms: [
+            { id: 'r1', name: 'Biology Lab 1', capacity: 60, energyCost: 'Medium' },
+            { id: 'r2', name: 'Campus Stadium', capacity: 500, energyCost: 'Extreme' },
+            { id: 'r3', name: 'Seminar Room 4', capacity: 30, energyCost: 'Low' },
+        ]
+    }
 ];
 
 const TimetableOptimizer = ({ onBack }) => {
-    const [classes, setClasses] = useState(CLASSES);
+    // Start with a random scenario
+    const [currentScenario, setCurrentScenario] = useState(() => SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]);
+    const [classes, setClasses] = useState(currentScenario.classes);
     const [gameState, setGameState] = useState('playing'); // playing, gameover
     const [score, setScore] = useState(0);
 
@@ -33,7 +65,7 @@ const TimetableOptimizer = ({ onBack }) => {
                 allAssigned = false;
                 return;
             }
-            const room = ROOMS.find(r => r.id === c.assignedRoom);
+            const room = currentScenario.rooms.find(r => r.id === c.assignedRoom);
             if (c.size > room.capacity) {
                 errors.push(`Overcrowded: ${c.name} (${c.size}) cannot fit in ${room.name} (${room.capacity}).`);
             } else if (room.capacity - c.size > 100) {
@@ -55,7 +87,9 @@ const TimetableOptimizer = ({ onBack }) => {
     };
 
     const reset = () => {
-        setClasses(CLASSES);
+        const nextScenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
+        setCurrentScenario(nextScenario);
+        setClasses(nextScenario.classes);
         setGameState('playing');
         setScore(0);
     };
@@ -98,7 +132,7 @@ const TimetableOptimizer = ({ onBack }) => {
                                                 onChange={(e) => handleAssign(c.id, e.target.value)}
                                             >
                                                 <option value="" disabled>Select a room...</option>
-                                                {ROOMS.map(r => (
+                                                {currentScenario.rooms.map(r => (
                                                     <option key={r.id} value={r.id}>{r.name} (Cap: {r.capacity})</option>
                                                 ))}
                                             </select>
@@ -112,7 +146,7 @@ const TimetableOptimizer = ({ onBack }) => {
                                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                                     <Maximize2 className="text-blue-400" /> Campus Rooms
                                 </h3>
-                                {ROOMS.map(r => (
+                                {currentScenario.rooms.map(r => (
                                     <div key={r.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center">
                                         <div>
                                             <h4 className="font-bold text-slate-300">{r.name}</h4>

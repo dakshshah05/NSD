@@ -2,16 +2,30 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, Sun, Wind, ThermometerSun, Leaf, Settings, Home, ArrowRight } from 'lucide-react';
 
-const UPGRADES = [
+const UPGRADES_POOL = [
     { id: 'solar', name: 'Rooftop Solar', cost: 50000, savings: 15000, co2: -120, icon: Sun, color: 'text-yellow-400' },
     { id: 'insulation', name: 'Thermal Insulation', cost: 20000, savings: 8000, co2: -40, icon: ThermometerSun, color: 'text-orange-400' },
     { id: 'smart_hvac', name: 'Smart HVAC System', cost: 80000, savings: 30000, co2: -250, icon: Wind, color: 'text-blue-400' },
     { id: 'led_lighting', name: 'LED Auto-Sensors', cost: 15000, savings: 12000, co2: -70, icon: Leaf, color: 'text-emerald-400' },
+    { id: 'low_flow', name: 'Low-Flow Fixtures', cost: 8000, savings: 5000, co2: -15, icon: ThermometerSun, color: 'text-cyan-400' },
+    { id: 'geothermal', name: 'Geothermal Heat', cost: 120000, savings: 45000, co2: -400, icon: Sun, color: 'text-red-500' },
+    { id: 'smart_glass', name: 'Electrochromic Glass', cost: 35000, savings: 10000, co2: -65, icon: Building2, color: 'text-sky-300' },
+    { id: 'wind_turbine', name: 'Micro Wind Turbine', cost: 40000, savings: 11000, co2: -90, icon: Wind, color: 'text-slate-300' },
 ];
+
+const getRandomUpgrades = () => {
+    let result = [...UPGRADES_POOL];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result.slice(0, 4);
+};
 
 const CampusArchitect = ({ onBack }) => {
     const [gameState, setGameState] = useState('planning'); // planning, simulation, results
     const [budget, setBudget] = useState(100000);
+    const [availableUpgrades, setAvailableUpgrades] = useState(getRandomUpgrades());
     const [selectedUpgrades, setSelectedUpgrades] = useState([]);
     const [results, setResults] = useState(null);
 
@@ -47,6 +61,7 @@ const CampusArchitect = ({ onBack }) => {
         setGameState('planning');
         setBudget(100000);
         setSelectedUpgrades([]);
+        setAvailableUpgrades(getRandomUpgrades());
         setResults(null);
     };
 
@@ -83,7 +98,7 @@ const CampusArchitect = ({ onBack }) => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {UPGRADES.map(upgrade => {
+                            {availableUpgrades.map(upgrade => {
                                 const isSelected = selectedUpgrades.find(u => u.id === upgrade.id);
                                 const canAfford = budget >= upgrade.cost;
                                 return (

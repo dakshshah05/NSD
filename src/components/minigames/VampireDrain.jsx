@@ -2,30 +2,43 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Power, Timer, AlertTriangle, Monitor, Tv, Smartphone, Battery, Coffee, Play, Award, RotateCcw } from 'lucide-react';
 
-const PHANTOM_LOADS = [
-    { id: 1, name: 'Phone Charger', power: 5, icon: Smartphone, x: 20, y: 30, found: false },
-    { id: 2, name: 'TV on Standby', power: 15, icon: Tv, x: 70, y: 40, found: false },
-    { id: 3, name: 'Idle PC Monitor', power: 25, icon: Monitor, x: 40, y: 60, found: false },
-    { id: 4, name: 'Coffee Machine', power: 10, icon: Coffee, x: 80, y: 80, found: false },
-    { id: 5, name: 'Laptop Brick', power: 8, icon: Battery, x: 15, y: 75, found: false },
-    { id: 6, name: 'Microwave Clock', power: 3, icon: AlertTriangle, x: 50, y: 25, found: false },
+const PHANTOM_LOADS_POOL = [
+    { id: 1, name: 'Phone Charger', power: 5, icon: Smartphone },
+    { id: 2, name: 'TV on Standby', power: 15, icon: Tv },
+    { id: 3, name: 'Idle PC Monitor', power: 25, icon: Monitor },
+    { id: 4, name: 'Coffee Machine', power: 10, icon: Coffee },
+    { id: 5, name: 'Laptop Brick', power: 8, icon: Battery },
+    { id: 6, name: 'Microwave Clock', power: 3, icon: AlertTriangle },
+    { id: 7, name: 'Space Heater', power: 45, icon: Power },
+    { id: 8, name: 'Router', power: 12, icon: Power },
 ];
+
+const getRandomLoads = () => {
+    let result = [...PHANTOM_LOADS_POOL];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    // Pick 6 random loads and assign random coordinates
+    return result.slice(0, 6).map(load => ({
+        ...load,
+        id: Math.random(), // Ensure unique ID for this round
+        found: false,
+        x: Math.random() * 70 + 10,
+        y: Math.random() * 70 + 10
+    }));
+};
 
 const GAME_TIME = 15; // seconds
 
 const VampireDrain = ({ onBack }) => {
     const [gameState, setGameState] = useState('start'); // start, playing, gameover
-    const [loads, setLoads] = useState(PHANTOM_LOADS);
+    const [loads, setLoads] = useState([]);
     const [timeLeft, setTimeLeft] = useState(GAME_TIME);
     const [score, setScore] = useState(0);
 
     const startGame = () => {
-        setLoads(PHANTOM_LOADS.map(l => ({ 
-            ...l, 
-            found: false, 
-            x: Math.random() * 70 + 10, 
-            y: Math.random() * 70 + 10 
-        })));
+        setLoads(getRandomLoads());
         setTimeLeft(GAME_TIME);
         setScore(0);
         setGameState('playing');
