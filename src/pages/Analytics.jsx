@@ -4,13 +4,16 @@ import {
   ComposedChart, Line, Area, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
 import { getMockData } from '../data/mockData';
-import { fetchDailyStats } from '../data/historicalData';
+import { fetchDailyStats, checkScheduleAnomalies } from '../data/historicalData';
 import { useDate } from '../context/DateContext';
-import { AlertTriangle, TrendingUp, Info } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Info, Clock, Power } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Analytics = () => {
   const { selectedDate } = useDate();
   const [dayData, setDayData] = useState(null);
+  const [anomalies, setAnomalies] = useState([]);
+  const [loadingAnomalies, setLoadingAnomalies] = useState(true);
 
   React.useEffect(() => {
       async function load() {
@@ -21,6 +24,19 @@ const Analytics = () => {
       }
       load();
   }, [selectedDate]);
+
+  React.useEffect(() => {
+      async function loadAnomalies() {
+          setLoadingAnomalies(true);
+          const detected = await checkScheduleAnomalies();
+          setAnomalies(detected);
+          setLoadingAnomalies(false);
+      }
+      loadAnomalies();
+      // Auto-refresh anomalies every minute
+      const interval = setInterval(loadAnomalies, 60000);
+      return () => clearInterval(interval);
+  }, []);
 
   if (!dayData) return <div className="p-10 text-center opacity-50">Loading Analytics...</div>;
   
@@ -120,6 +136,69 @@ const Analytics = () => {
              </ResponsiveContainer>
            </div>
         </div>
+      </div>
+
+      {/* --- SCHEDULE ANOMALY DETECTION (AI/Timetable integration) --- */}
+      <div className="bg-gradient-to-r from-slate-900 to-red-950/20 border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg relative overflow-hidden">
+         <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+             <AlertTriangle size={150} />
+         </div>
+         <div className="relative z-10 flex items-center gap-3 mb-6">
+             <div className="p-2 bg-red-500/20 rounded-lg text-red-500 animate-pulse">
+                <AlertTriangle size={24} />
+             </div>
+             <div>
+                 <h3 className="text-xl font-bold text-white">Live Schedule Anomalies</h3>
+                 <p className="text-sm text-slate-400">Comparing active room power against the official daily timetable.</p>
+             </div>
+         </div>
+
+         {loadingAnomalies ? (
+             <div className="py-8 text-center text-slate-400 animate-pulse flex flex-col items-center">
+                 <Power className="mb-2 opacity-50" size={32} />
+                 Scanning campus grid for unscheduled power draw...
+             </div>
+         ) : anomalies.length === 0 ? (
+             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 flex items-center justify-center text-emerald-400 gap-3">
+                 <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                 <span className="font-medium">All clear. No unauthorized or unscheduled energy usage detected at this time.</span>
+             </div>
+         ) : (
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                 {anomalies.map((anomaly, i) => (
+                     <motion.div 
+                        key={anomaly.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="bg-[rgb(var(--bg-input))] border border-red-500/30 rounded-xl p-5 hover:border-red-500/60 transition-colors relative group"
+                     >
+                         <div className="absolute top-0 left-0 w-1 h-full bg-red-500 rounded-l-xl" />
+                         <div className="flex justify-between items-start mb-3 ml-2">
+                             <h4 className="font-bold text-white text-lg flex items-center gap-2">
+                                 {anomaly.room_name} 
+                                 <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20">
+                                     {anomaly.type}
+                                 </span>
+                             </h4>
+                         </div>
+                         <div className="space-y-2 ml-2">
+                             <div className="flex items-center text-sm text-slate-300 gap-2">
+                                 <Power size={14} className="text-amber-400" />
+                                 Drawing <span className="font-mono font-bold text-amber-400">{anomaly.power}W</span>
+                             </div>
+                             <div className="flex items-center text-sm text-slate-400 gap-2">
+                                 <Clock size={14} className="text-blue-400" />
+                                 {anomaly.details}
+                             </div>
+                         </div>
+                         <button className="mt-4 ml-2 w-full py-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-sm font-medium transition-colors border border-red-500/20 hover:border-red-500">
+                             Issue Remote Shutoff
+                         </button>
+                     </motion.div>
+                 ))}
+             </div>
+         )}
       </div>
 
       {/* Heatmap Section */}

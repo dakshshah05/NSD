@@ -116,6 +116,79 @@ export const fetchRecommendations = async () => {
     }
 }
 
+// --- ANOMALY DETECTION ---
+export const checkScheduleAnomalies = async () => {
+    try {
+        // 1. Fetch current live room status
+        const rooms = await fetchRoomStatus();
+        
+        // 2. Fetch today's timetable
+        const dayOfWeek = (new Date()).getDay(); // 0(Sun) - 6(Sat)
+        const { data: schedule, error } = await supabase
+            .from('timetable')
+            .select('*')
+            .eq('day_of_week', dayOfWeek);
+            
+        if (error) {
+            console.error("Timetable fetch error", error);
+            return [];
+        }
+
+        const anomalies = [];
+        
+        // Current Time Format HH:MM:SS
+        const now = new Date();
+        const currentTimeString = now.toTimeString().split(' ')[0];
+
+        // 3. Analyze each room
+        rooms.forEach(room => {
+            // Only care if the room is drawing significant power (e.g. lights/AC left on)
+            // Let's say anything over 50W means something is actively left on
+            if (room.power > 50) {
+                
+                // Find all classes scheduled in this room today
+                const roomClasses = schedule.filter(s => s.room_id === room.id);
+                
+                // Is a class currently happening?
+                const isClassOngoing = roomClasses.some(cls => {
+                    return currentTimeString >= cls.start_time && currentTimeString <= cls.end_time;
+                });
+
+                // If no class is ongoing, we have an anomaly!
+                if (!isClassOngoing) {
+                    // Try to figure out if a class just ended
+                    const pastClasses = roomClasses.filter(cls => currentTimeString > cls.end_time)
+                                                   .sort((a,b) => b.end_time.localeCompare(a.end_time)); // Latest first
+                    
+                    let details = "No scheduled classes.";
+                    if (pastClasses.length > 0) {
+                        const lastClass = pastClasses[0];
+                        details = `After ${lastClass.course_name}. Ended at ${lastClass.end_time.slice(0,5)}.`;
+                    } else if (roomClasses.length > 0) {
+                         const nextClass = roomClasses.find(cls => currentTimeString < cls.start_time);
+                         if(nextClass) details = `Before ${nextClass.course_name} (Starts at ${nextClass.start_time.slice(0,5)}).`;
+                    }
+
+                    anomalies.push({
+                        id: `anomaly_${room.id}_${Date.now()}`,
+                        room_id: room.id,
+                        room_name: room.name,
+                        power: room.power,
+                        details: details,
+                        type: 'Unscheduled Usage'
+                    });
+                }
+            }
+        });
+
+        return anomalies;
+
+    } catch (e) {
+        console.error("Anomaly Detection crashed", e);
+        return [];
+    }
+};
+
 // --- LEGACY EXPORTS (Restored for Backward Compatibility) ---
 // Use defensive generation to prevent module-level crashes
 
