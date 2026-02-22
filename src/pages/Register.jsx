@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars, Float, PerspectiveCamera } from '@react-three/drei';
-import { Mail, Lock, UserPlus, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, UserPlus, ArrowRight, Eye, EyeOff, User, Shield, Activity } from 'lucide-react';
 
 const AnimatedTorus = () => {
   const meshRef = useRef();

@@ -46,18 +46,27 @@ export const AuthProvider = ({ children }) => {
         finalRole = profile.role;
       }
 
-      if (!profile) {
+      if (!profile && userId) {
         // 4a. Create profile if missing
-        await supabase.from('user_points').insert([{
+        // Use the metadata role if available, otherwise fallback to student
+        const initialRole = metaRole || finalRole || 'student';
+        const displayName = email.split('@')[0].split('.')[0].charAt(0).toUpperCase() + email.split('@')[0].split('.')[0].slice(1);
+        
+        const { error: insertError } = await supabase.from('user_points').insert([{
            id: userId,
            points: 0,
-           role: finalRole,
-           display_name: email.split('@')[0]
+           role: initialRole,
+           display_name: displayName
         }]);
-        console.log(`Created profile for ${email} with role: ${finalRole}`);
-      } else if ( (authorized && profile.role !== authorized.role) || (metaRole && profile.role !== metaRole) ) {
+
+        if (insertError) {
+          console.error("Error creating user profile:", insertError);
+        } else {
+          console.log(`Created profile for ${email} with role: ${initialRole} and name: ${displayName}`);
+          setUserRole(initialRole);
+        }
+      } else if (profile && ( (authorized && profile.role !== authorized.role) || (metaRole && profile.role !== metaRole) )) {
         // 4b. UPDATE profile if authorization or metadata exists and differs from current role
-        // Authorized (whitelist) still takes precedence over metadata
         const roleToUpdate = authorized ? authorized.role : metaRole;
         
         await supabase.from('user_points')
@@ -65,9 +74,10 @@ export const AuthProvider = ({ children }) => {
           .eq('id', userId);
         console.log(`Updated role for ${email} to: ${roleToUpdate}`);
         finalRole = roleToUpdate;
+        setUserRole(finalRole);
+      } else if (profile) {
+        setUserRole(profile.role);
       }
-
-      setUserRole(finalRole);
 
     } catch (err) {
       console.error("Error syncing role:", err);
