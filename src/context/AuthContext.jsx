@@ -18,37 +18,47 @@ export const AuthProvider = ({ children }) => {
     }
     
     try {
-      // 2. Check if profile already exists in user_points
-      const { data: profile } = await supabase
-        .from('user_points')
-        .select('role')
-        .eq('id', userId)
-        .maybeSingle();
-      
-      if (profile?.role) {
-        setUserRole(profile.role);
-        return;
-      }
-
-      // 3. User is new or has no profile. Check if Admin PRE-AUTHORIZED this email in 'user_roles'
+      // 2. Lookup pre-authorization FIRST
       const { data: authorized } = await supabase
         .from('user_roles')
         .select('role')
         .eq('email', email.toLowerCase())
         .maybeSingle();
 
-      const finalRole = authorized?.role || 'student';
-
-      // 4. Create the profile with the determined role
-      await supabase.from('user_points').insert([{
-         id: userId,
-         points: 0,
-         role: finalRole,
-         display_name: email.split('@')[0]
-      }]);
+      // 3. Lookup existing profile
+      const { data: profile } = await supabase
+        .from('user_points')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
       
+      // Determine the best role
+      let finalRole = 'student';
+      if (authorized) {
+        finalRole = authorized.role;
+      } else if (profile) {
+        finalRole = profile.role;
+      }
+
+      if (!profile) {
+        // 4a. Create profile if missing
+        await supabase.from('user_points').insert([{
+           id: userId,
+           points: 0,
+           role: finalRole,
+           display_name: email.split('@')[0]
+        }]);
+        console.log(`Created profile for ${email} with role: ${finalRole}`);
+      } else if (authorized && profile.role !== authorized.role) {
+        // 4b. UPDATE profile if authorization exists and differs from current role
+        await supabase.from('user_points')
+          .update({ role: authorized.role })
+          .eq('id', userId);
+        console.log(`Upgraded role for ${email} to: ${authorized.role}`);
+        finalRole = authorized.role;
+      }
+
       setUserRole(finalRole);
-      console.log(`Synced authorized role for ${email}: ${finalRole}`);
 
     } catch (err) {
       console.error("Error syncing role:", err);
