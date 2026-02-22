@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { clsx } from 'clsx';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { User, Mail, Shield, Calendar, Edit2, Key, Check, Award, TrendingUp } from 'lucide-react';
