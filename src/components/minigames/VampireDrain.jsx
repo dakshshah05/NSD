@@ -102,16 +102,18 @@ const InteractiveDevice = ({ id, position, args = [0.5, 0.5, 0.5], type = 'box',
         </Cylinder>
       )}
       
-      {!isFound && hovered && (
-         <Text position={[0, args[1] + 0.4, 0]} fontSize={0.2} color="#fca5a5" anchorX="center" anchorY="bottom" outlineWidth={0.02} outlineColor="#000000">
-             {name} ({power}W)
-         </Text>
-      )}
-      {isFound && (
-         <Text position={[0, args[1] + 0.4, 0]} fontSize={0.2} color="#10b981" anchorX="center" anchorY="bottom">
-             UNPLUGGED
-         </Text>
-      )}
+      <Text 
+        position={[0, args[1] + 0.3, 0]} 
+        fontSize={0.25} 
+        color={isFound ? "#10b981" : (hovered ? "#fca5a5" : "#cbd5e1")} 
+        anchorX="center" 
+        anchorY="bottom"
+        outlineWidth={0.02}
+        outlineColor="#000000"
+        fillOpacity={isFound ? 1 : 0.8}
+      >
+        {isFound ? "OFF" : name}
+      </Text>
     </group>
   );
 };
@@ -123,12 +125,12 @@ const Flashlight = () => {
   
     useFrame(() => {
       if (lightRef.current) {
-        // Map pointer coordinates to world coordinates roughly
-        const x = (pointer.x * viewport.width) / 2;
-        const y = (pointer.y * viewport.height) / 2;
+        // Map pointer coordinates to a wider range
+        const x = (pointer.x * viewport.width);
+        const y = (pointer.y * viewport.height);
         
         // Position the point light at the cursor's world X/Y but pushed into the screen Z
-        lightRef.current.position.set(x, y + 1, 1.5);
+        lightRef.current.position.set(x, y + 2, 2.5);
       }
     });
   
@@ -136,77 +138,75 @@ const Flashlight = () => {
       <pointLight
         ref={lightRef}
         color="#ffffff"
-        intensity={10}
-        distance={8}
-        decay={2}
+        intensity={12}
+        distance={15}
+        decay={1.8}
         castShadow
       />
     );
 };
 
 const INITIAL_DEVICES = [
-    { id: 1, name: 'Idle PC Monitor', power: 25, type: 'box', args: [1.6, 1.0, 0.15], position: [-1.8, 0, -3.7], color: '#cbd5e1' },
-    { id: 2, name: 'Phone Charger', power: 5, type: 'box', args: [0.2, 0.2, 0.25], position: [-3.5, -0.3, -3.7], color: '#f8fafc' },
-    { id: 3, name: 'TV on Standby', power: 15, type: 'box', args: [3.2, 1.8, 0.15], position: [2.5, 0.4, -3.8], color: '#334155' },
-    { id: 4, name: 'Game Console', power: 12, type: 'box', args: [1.2, 0.3, 0.8], position: [2.0, -0.8, -3.8], color: '#f8fafc' },
-    { id: 5, name: 'Coffee Maker', power: 8, type: 'cylinder', args: [0.4, 0.4, 0.8, 32], position: [-4.0, -0.8, 1.5], color: '#ef4444' },
-    { id: 6, name: 'Space Heater', power: 45, type: 'box', args: [0.8, 1.0, 0.4], position: [3.5, -1.4, 1.0], color: '#fb923c' },
+    { id: 1, name: 'Main Lights', power: 45, type: 'box', args: [1.2, 0.4, 0.2], position: [0, 2, -3.8], color: '#cbd5e1' },
+    { id: 2, name: 'Ceiling Fan', power: 35, type: 'cylinder', args: [0.8, 0.8, 0.1, 32], position: [0, 2.5, 0], color: '#f8fafc' },
+    { id: 3, name: 'Projector', power: 60, type: 'box', args: [0.6, 0.3, 0.6], position: [0, 2.2, 0], color: '#334155' },
+    { id: 4, name: 'Teacher PC', power: 25, type: 'box', args: [1.0, 0.6, 0.1], position: [-2, -0.1, -3.7], color: '#f8fafc' },
+    { id: 5, name: 'AC Unit', power: 120, type: 'box', args: [1.5, 0.5, 0.4], position: [0, 2, -4.8], color: '#cbd5e1' },
+    { id: 6, name: 'Smart Board', power: 45, type: 'box', args: [3.5, 2.0, 0.1], position: [0, 0.5, -4.9], color: '#fff' },
 ];
-
 const VampireDrain = ({ onBack }) => {
-    const [gameState, setGameState] = useState('start'); // start, playing, gameover
-    const [devices, setDevices] = useState(INITIAL_DEVICES.map(d => ({ ...d, found: false })));
+    const [gameState, setGameState] = useState('start'); // start, loading, no_loads, playing, gameover
+    const [availableRooms, setAvailableRooms] = useState([]);
+    const [selectedRoom, setSelectedRoom] = useState(null);
+    const [devices, setDevices] = useState([]);
     const [timeLeft, setTimeLeft] = useState(GAME_TIME);
     const [score, setScore] = useState(0);
 
     // Memos for easy checking
-    const allFound = devices.every(d => d.found);
+    const allFound = devices.length > 0 && devices.every(d => d.found);
 
-    const startGame = async () => {
-        setGameState('loading');
-        
-        try {
-            // Fetch live data from Supabase real life DB
-            const rooms = await fetchRoomStatus();
-            
-            // Filter rooms that actually have things turned ON (wasting power)
-            const wastingRooms = rooms.filter(r => r.lights || r.fans);
-            
-            if (wastingRooms.length === 0) {
-                // No actual rooms are wasting energy! 
-                setGameState('no_loads');
-                return;
+    useEffect(() => {
+        // Load available rooms on mount
+        const loadRooms = async () => {
+            setGameState('loading');
+            try {
+                const rooms = await fetchRoomStatus();
+                // Find rooms wasting energy
+                const wastingRooms = rooms.filter(r => r.lights || r.fans);
+                if (wastingRooms.length === 0) {
+                    setGameState('no_loads');
+                } else {
+                    setAvailableRooms(wastingRooms);
+                    setGameState('start'); // Let the user pick a room
+                }
+            } catch (error) {
+                console.error("Failed to load real life rooms:", error);
+                setGameState('start'); 
             }
+        };
+        loadRooms();
+    }, []);
 
-            // Map the real life rooms to our 3D devices
-            // We use the room ID as the device ID so we can toggle it back
-            let activeDevices = wastingRooms.slice(0, 6).map((room, index) => {
-                // Alternate between Box and Cylinder shapes just for visual variety
-                const baseDevice = INITIAL_DEVICES[index % INITIAL_DEVICES.length];
-                return {
-                    ...baseDevice,
-                    id: room.id,
-                    realRoomName: room.name,
-                    name: room.lights && room.fans ? 'Lights & Fans' : (room.lights ? 'Left-on Lights' : 'Spinning Fan'),
-                    power: room.power || 30, // Use actual wattage if present
-                    found: false,
-                    isLightInfo: room.lights,
-                    isFanInfo: room.fans,
-                };
-            });
-
-            setDevices(activeDevices);
-            setTimeLeft(GAME_TIME);
-            setScore(0);
-            setGameState('playing');
-        } catch (error) {
-            console.error("Failed to load real life devices:", error);
-            // Fallback to static if DB fails
-            setDevices(INITIAL_DEVICES.map(d => ({ ...d, found: false })));
-            setTimeLeft(GAME_TIME);
-            setScore(0);
-            setGameState('playing');
+    const startGame = async (room) => {
+        setSelectedRoom(room);
+        
+        let activeDevices = [];
+        
+        if (room.lights && room.fans) {
+            // Spawn one for lights, one for fans
+            activeDevices.push({ ...INITIAL_DEVICES[0], id: `${room.id}-lights`, realRoomId: room.id, realRoomName: room.name, typeTarget: 'lights', found: false });
+            activeDevices.push({ ...INITIAL_DEVICES[1], id: `${room.id}-fans`, realRoomId: room.id, realRoomName: room.name, typeTarget: 'fans', found: false });
+        } else if (room.lights) {
+            activeDevices.push({ ...INITIAL_DEVICES[0], id: `${room.id}-lights`, realRoomId: room.id, realRoomName: room.name, typeTarget: 'lights', found: false });
+            activeDevices.push({ ...INITIAL_DEVICES[5], id: `${room.id}-board`, realRoomId: room.id, realRoomName: room.name, typeTarget: 'lights', found: false }); 
+        } else if (room.fans) {
+            activeDevices.push({ ...INITIAL_DEVICES[1], id: `${room.id}-fans`, realRoomId: room.id, realRoomName: room.name, typeTarget: 'fans', found: false });
         }
+
+        setDevices(activeDevices);
+        setTimeLeft(GAME_TIME);
+        setScore(0);
+        setGameState('playing');
     };
 
     useEffect(() => {
@@ -233,13 +233,18 @@ const VampireDrain = ({ onBack }) => {
 
         // ACTUALLY Turn it off in real life (Supabase)
         const targetDevice = devices.find(d => d.id === id);
-        if (targetDevice && targetDevice.realRoomName) {
+        if (targetDevice && targetDevice.realRoomId) {
             try {
+                const updatePayload = {};
+                if (targetDevice.typeTarget === 'lights') updatePayload.lights = false;
+                if (targetDevice.typeTarget === 'fans') updatePayload.fans = false;
+
                 await supabase
                     .from('room_status')
-                    .update({ lights: false, fans: false, power: 0 })
-                    .eq('id', id);
-                console.log(`Successfully turned off ${targetDevice.realRoomName} via Vampire Drain 3D!`);
+                    .update(updatePayload)
+                    .eq('id', targetDevice.realRoomId);
+                    
+                console.log(`Successfully turned off ${targetDevice.typeTarget} in ${targetDevice.realRoomName} via Vampire Drain 3D!`);
             } catch (error) {
                 console.error("Failed to update real life switch:", error);
             }
@@ -274,20 +279,32 @@ const VampireDrain = ({ onBack }) => {
                 {/* Intro Screen */}
                 {gameState === 'start' && (
                     <div className="absolute inset-0 flex items-center justify-center z-30 bg-slate-900/80 backdrop-blur-md">
-                        <div className="bg-slate-900 border border-slate-700 p-8 rounded-3xl max-w-lg text-center shadow-2xl backdrop-blur-md">
-                            <Power size={64} className="text-purple-500 mx-auto mb-6" />
-                            <h3 className="text-3xl font-black text-white mb-4">3D Vampire Room</h3>
-                            <p className="text-slate-300 mb-8 leading-relaxed">
-                                Use your mouse to aim the flashlight around the dark room. Navigate around the 3D environment by dragging.
-                                <br/><br/>
-                                Click on the red glowing devices to unplug them before {GAME_TIME} seconds run out!
+                        <div className="bg-slate-900 border border-slate-700 p-8 rounded-3xl w-full max-w-2xl text-center shadow-2xl backdrop-blur-md">
+                            <Power size={64} className="text-purple-500 mx-auto mb-6 flex-shrink-0" />
+                            <h3 className="text-3xl font-black text-white mb-2">Simulate Physical Rooms</h3>
+                            <p className="text-slate-300 mb-6 leading-relaxed max-w-lg mx-auto">
+                                The following rooms on campus currently have their lights or fans running completely empty. Choose a room to virtually enter it and manually override the physical smart switches to shut off the loads.
                             </p>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8 max-h-48 overflow-y-auto p-2 pr-4 custom-scrollbar">
+                                {availableRooms.map(room => (
+                                    <button 
+                                        key={room.id}
+                                        onClick={() => startGame(room)}
+                                        className="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-4 rounded-xl text-left transition-all group flex flex-col justify-center items-center text-center"
+                                    >
+                                        <p className="font-bold text-white group-hover:text-purple-400">{room.name}</p>
+                                        <p className="text-xs text-slate-400">{room.lights && room.fans ? 'Lights & Fans ON' : (room.lights ? 'Lights ON' : 'Fans ON')}</p>
+                                    </button>
+                                ))}
+                                {availableRooms.length === 0 && (
+                                    <div className="col-span-full py-8 text-slate-500 italic">No rooms available for simulation (Database fetch failed or no rooms to show).</div>
+                                )}
+                            </div>
+
                             <div className="flex justify-center gap-4">
-                                <button onClick={startGame} className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
-                                    <Power size={20} /> Enter Room
-                                </button>
-                                <button onClick={onBack} className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl font-bold transition-all">
-                                    Exit
+                                <button onClick={onBack} className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl font-bold transition-all w-full md:w-auto mt-2">
+                                    Exit Simulator
                                 </button>
                             </div>
                         </div>
@@ -310,8 +327,8 @@ const VampireDrain = ({ onBack }) => {
                                 You unplugged <span className="text-amber-400 font-bold">{score}W</span> of phantom loads in this room.
                             </p>
                             <div className="flex justify-center gap-4">
-                                <button onClick={startGame} className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
-                                    <RotateCcw size={20} /> Another Round
+                                <button onClick={() => setGameState('start')} className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+                                    <RotateCcw size={20} /> Select Another Room
                                 </button>
                                 <button onClick={onBack} className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl font-bold transition-all">
                                     Back to Hub
@@ -349,9 +366,9 @@ const VampireDrain = ({ onBack }) => {
                 )}
 
                 {/* 3D Scene */}
-                <Canvas shadows camera={{ position: [0, 1.5, 3.5], fov: 45 }}>
+                <Canvas shadows camera={{ position: [0, 3, 10], fov: 45 }}>
                     {/* Very dim ambient light so the room isn't pitch black, but still dark */}
-                    <ambientLight intensity={0.3} />
+                    <ambientLight intensity={0.6} />
                     
                     {/* Dynamic Flashlight that follows mouse */}
                     {gameState === 'playing' && <Flashlight />}
@@ -376,14 +393,11 @@ const VampireDrain = ({ onBack }) => {
                     ))}
 
                     <OrbitControls 
-                        enablePan={false} 
+                        enablePan={true} 
                         enableZoom={true} 
-                        minDistance={2}
-                        maxDistance={5}
-                        minAzimuthAngle={-Math.PI / 4} 
-                        maxAzimuthAngle={Math.PI / 4}
-                        minPolarAngle={Math.PI / 4}
-                        maxPolarAngle={Math.PI / 2}
+                        minDistance={3}
+                        maxDistance={15}
+                        maxPolarAngle={Math.PI / 2.1}
                     />
                 </Canvas>
             </div>
