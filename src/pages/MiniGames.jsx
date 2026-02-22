@@ -75,7 +75,6 @@ const MiniGames = () => {
             
             if (totalLoad >= MAX_GRID_CAPACITY) {
                 setGameState('gameover');
-                awardSupabasePoints(Math.floor(score / 10)); // Convert score to green points securely!
             }
         }, 500);
 
@@ -95,14 +94,6 @@ const MiniGames = () => {
         if (app) {
              setScore(s => s + app.power);
              setActiveAppliances(prev => prev.filter(a => a.id !== id));
-        }
-    };
-
-    const awardSupabasePoints = async (earnedPoints) => {
-        if (earnedPoints <= 0) return;
-        if (user?.id) {
-            await supabase.rpc('add_green_points', { user_id: user.id, points_to_add: earnedPoints });
-            addNotification('Game Over!', `You kept the grid stable and earned +${earnedPoints} Green Points!`, 'success');
         }
     };
 
@@ -166,7 +157,7 @@ const MiniGames = () => {
                            <p className="text-4xl font-mono font-bold text-white mb-4">{score}</p>
                            <div className="bg-emerald-500/20 text-emerald-300 py-2 px-4 rounded-lg flex items-center justify-center gap-2">
                                <Award size={18} />
-                               Earned +{Math.floor(score / 10)} Green Points
+                               Great attempt at keeping the campus grid stable!
                            </div>
                        </div>
 
