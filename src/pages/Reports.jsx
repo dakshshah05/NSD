@@ -102,7 +102,7 @@ const Reports = () => {
               {
                   to_email: recipientEmail,
                   subject: `EnergyGuard Report: ${filename}`,
-                  message: `Please find the generated report data for ${selectedDate}.`,
+                  message: `You have downloaded report data for ${selectedDate}.`,
                   csv_data: csvDataUri, 
                   date: selectedDate,
                   filename: filename
