@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import Impact from './pages/Impact';
 import Rooms from './pages/Rooms';
 import Analytics from './pages/Analytics';
 import Recommendations from './pages/Recommendations';
@@ -37,6 +38,7 @@ function App() {
                 <Layout>
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
+                    <Route path="/impact" element={<Impact />} />
                     <Route path="/rooms" element={<Rooms />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/recommendations" element={<Recommendations />} />

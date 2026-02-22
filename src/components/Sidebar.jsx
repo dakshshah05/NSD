@@ -10,6 +10,7 @@ import {
   X,
   FileText,
   LogOut,
+  Globe,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -49,6 +50,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const navItems = [
     { name: "Dashboard", path: "/", icon: LayoutDashboard },
+    { name: "Campus Gamification & Impact", path: "/impact", icon: Globe },
     { name: "Live Rooms", path: "/rooms", icon: Zap },
     { name: "Analytics", path: "/analytics", icon: BarChart3 },
     { name: "AI Recommendations", path: "/recommendations", icon: Cpu },
