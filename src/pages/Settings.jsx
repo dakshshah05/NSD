@@ -111,6 +111,8 @@ const Settings = () => {
     setIsAddingUser(true);
     
     try {
+      console.log("Attempting to create user via RPC:", { email: newEmail, role: newRole });
+      
       // Direct User Creation via Database RPC (Cloud Dashboard Compatible)
       const { data, error } = await supabase.rpc('admin_create_user', {
         target_email: newEmail.toLowerCase(), 
@@ -118,16 +120,29 @@ const Settings = () => {
         target_role: newRole 
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        console.error("Supabase RPC Error:", error);
+        throw new Error(`Database Error: ${error.message}. Did you run the SQL code in Supabase?`);
+      }
 
-      addNotification('Success', `${newEmail} created successfully as ${newRole}.`);
+      if (data?.error) {
+        console.error("RPC Logic Error:", data.error);
+        throw new Error(data.error);
+      }
+
+      addNotification('Success', `Account for ${newEmail} is ready!`);
       setNewEmail('');
       setNewPassword('');
       fetchAuthorizedUsers();
     } catch (err) {
-      console.error("Create User Error:", err);
-      addNotification('Error', err.message || 'Failed to create user. Ensure SQL RPC is created in Supabase.');
+      console.error("Full Creation Error:", err);
+      // Explicitly tell the user what to do
+      const errorMsg = err.message || 'Unknown error occurred.';
+      addNotification('Creation Failed', errorMsg);
+      
+      if (errorMsg.includes('not found')) {
+        addNotification('Instruction', 'Please run the SQL code provided in the repair guide.');
+      }
     } finally {
       setIsAddingUser(false);
     }
