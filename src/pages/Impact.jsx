@@ -2,8 +2,10 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Sphere, MeshDistortMaterial, Float, Stars, Text } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Leaf, Zap, AlertTriangle, Send, ChevronRight, Droplets, Wind, UserCheck, Search, Users } from 'lucide-react';
+import { Trophy, Leaf, Zap, AlertTriangle, Send, ChevronRight, Droplets, Wind, UserCheck, Search, Users, Award } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabaseClient';
 
 // --- 3D Components ---
 
@@ -81,24 +83,46 @@ const HOSTEL_RANKINGS = [
 
 const Impact = () => {
   const { addNotification } = useNotifications();
+  const { user } = useAuth();
   const [reportType, setReportType] = useState('electricity');
   const [reportLocation, setReportLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [topUsers, setTopUsers] = useState([]);
+
+  const fetchLeaderboard = async () => {
+      const { data } = await supabase
+          .from('user_points')
+          .select('display_name, points')
+          .order('points', { ascending: false })
+          .limit(5);
+      if (data) setTopUsers(data);
+  };
+
+  useEffect(() => {
+      fetchLeaderboard();
+  }, []);
 
   // Gamification & Real world metrics
   const treesPlanted = 124;
   const co2Avoided = 850; // kg
   const mealsFunded = 32;
 
-  const handleReportSubmit = (e) => {
+  const handleReportSubmit = async (e) => {
       e.preventDefault();
       if(!reportLocation) return;
       
       setIsSubmitting(true);
+      
+      // Award 50 points to the user in Supabase
+      if (user?.id) {
+          await supabase.rpc('add_green_points', { user_id: user.id, points_to_add: 50 });
+      }
+
       setTimeout(() => {
           setIsSubmitting(false);
           setReportLocation('');
           addNotification('Report Submitted', `Thank you for reporting wastage at ${reportLocation}! +50 Green Points awarded.`, 'success');
+          fetchLeaderboard(); // Refresh leaderboard
       }, 1000);
   };
 
@@ -178,7 +202,7 @@ const Impact = () => {
           ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* --- LEADERBOARD & GAMIFICATION --- */}
           <div className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-3xl p-6 md:p-8 relative overflow-hidden">
@@ -238,6 +262,57 @@ const Impact = () => {
                          {block.icon && (
                              <block.icon size={24} className={`${block.color} opacity-80`} />
                          )}
+                     </motion.div>
+                 ))}
+             </div>
+          </div>
+
+          {/* --- STUDENT LEADERBOARD --- */}
+          <div className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-3xl p-6 md:p-8 relative overflow-hidden">
+             
+             <div className="flex justify-between items-center mb-8">
+                 <div>
+                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                        <Award className="text-emerald-400" /> Top Eco-Warriors
+                    </h2>
+                    <p className="text-sm text-slate-400 mt-1">Students leading by example</p>
+                 </div>
+             </div>
+
+             <div className="space-y-4">
+                 {topUsers.length === 0 ? (
+                     <div className="text-center py-10 text-slate-500">
+                         No users have earned points yet. Be the first!
+                     </div>
+                 ) : topUsers.map((topUser, i) => (
+                     <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + (i * 0.1) }}
+                        whileHover={{ scale: 1.02, translateX: 5 }}
+                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
+                            i === 0 
+                                ? 'bg-gradient-to-r from-emerald-500/10 to-transparent border-emerald-500/30' 
+                                : 'bg-[rgb(var(--bg-input))] border-transparent hover:border-[rgb(var(--border))]'
+                        }`}
+                     >
+                         <div className="flex items-center space-x-4">
+                             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg ${
+                                 i === 0 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40' : 
+                                 'bg-slate-800 text-slate-400'
+                             }`}>
+                                 #{i + 1}
+                             </div>
+                             <div>
+                                 <h3 className={`font-bold ${i===0 ? 'text-emerald-400' : 'text-[rgb(var(--text-main))]'}`}>
+                                     {topUser.display_name}
+                                 </h3>
+                                 <div className="flex items-center space-x-2 text-xs text-[rgb(var(--text-muted))] mt-1">
+                                     <span className="font-mono text-emerald-400">{topUser.points.toLocaleString()} pts</span>
+                                 </div>
+                             </div>
+                         </div>
                      </motion.div>
                  ))}
              </div>

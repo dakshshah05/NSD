@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
-import { User, Mail, Shield, Calendar, Edit2, Key, Check } from 'lucide-react';
+import { User, Mail, Shield, Calendar, Edit2, Key, Check, Award, TrendingUp } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 const Profile = () => {
@@ -12,6 +12,21 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState(user?.user_metadata?.full_name || 'Admin User');
   const [loading, setLoading] = useState(false);
+  const [points, setPoints] = useState(0);
+
+  useEffect(() => {
+    const fetchPoints = async () => {
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from('user_points')
+        .select('points')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      if (data) setPoints(data.points);
+    };
+    fetchPoints();
+  }, [user]);
 
   const handleSave = async () => {
     setLoading(true);
@@ -81,6 +96,35 @@ const Profile = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Gamification Card */}
+      <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-6 shadow-sm relative overflow-hidden">
+         <div className="absolute -right-6 -top-6 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+         
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+             <div>
+                 <h3 className="text-xl font-bold text-[rgb(var(--text-main))] flex items-center gap-2 mb-1">
+                     <Award className="text-emerald-500" />
+                     Campus Eco-Warrior Status
+                 </h3>
+                 <p className="text-sm text-[rgb(var(--text-muted))]">Earn points by reporting energy wastage on campus!</p>
+             </div>
+             
+             <div className="flex items-center gap-4 bg-[rgb(var(--bg-card))] p-4 rounded-xl border border-[rgb(var(--border))] shadow-inner">
+                 <div className="text-center px-4 border-r border-[rgb(var(--border))]">
+                     <p className="text-xs text-[rgb(var(--text-muted))] uppercase tracking-wider mb-1 font-semibold">Total Points</p>
+                     <p className="text-3xl font-black text-emerald-500">{points.toLocaleString()}</p>
+                 </div>
+                 <div className="text-center px-4">
+                     <p className="text-xs text-[rgb(var(--text-muted))] uppercase tracking-wider mb-1 font-semibold">Rank Status</p>
+                     <p className="text-lg font-bold text-amber-500 flex items-center gap-1">
+                         {points > 500 ? 'Elite Saver' : points > 100 ? 'Active Contributor' : 'Beginner'}
+                         <TrendingUp size={16} />
+                     </p>
+                 </div>
+             </div>
+         </div>
       </div>
 
       {/* Details Grid */}
