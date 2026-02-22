@@ -4,6 +4,7 @@ import { OrbitControls, Sphere, Float, Stars, Text, useTexture } from '@react-th
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Leaf, Zap, AlertTriangle, Send, ChevronRight, Droplets, Wind, UserCheck, Search, Users, Award } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
