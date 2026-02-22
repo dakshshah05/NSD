@@ -151,16 +151,21 @@ const Settings = () => {
   };
 
   const handleRemoveUser = async (email) => {
-    const { error } = await supabase
-      .from('user_roles')
-      .delete()
-      .eq('email', email);
+    if (!window.confirm(`Are you sure you want to PERMANENTLY delete account ${email}?`)) return;
 
-    if (error) {
-      addNotification('Error', 'Failed to remove user authorization.');
-    } else {
+    try {
+      const { data, error } = await supabase.rpc('admin_delete_user', { target_email: email });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      alert(`Success! ${email} has been completely removed.`);
       addNotification('Removed', `Access revoked for ${email}.`);
       fetchAuthorizedUsers();
+    } catch (err) {
+      console.error("Delete User Error:", err);
+      alert(`Delete Failed: ${err.message}`);
+      addNotification('Error', 'Failed to remove user account correctly.');
     }
   };
 
