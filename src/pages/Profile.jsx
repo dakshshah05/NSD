@@ -34,6 +34,11 @@ const Profile = () => {
       data: { full_name: displayName }
     });
     
+    // Sync the display name to the gamification leaderboard
+    if (user?.id) {
+       await supabase.from('user_points').update({ display_name: displayName }).eq('id', user.id);
+    }
+    
     setLoading(false);
     if (error) {
       addNotification('Error', 'Failed to update profile.');
