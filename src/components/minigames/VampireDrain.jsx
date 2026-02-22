@@ -60,7 +60,9 @@ const InteractiveDevice = ({ id, position, args = [0.5, 0.5, 0.5], type = 'box',
   const ref = useRef();
   useFrame((state) => {
     if (!isFound && ref.current) {
-        ref.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + id) * 0.05;
+        // Use a consistent numeric seed for animation instead of potentially string ID
+        const seed = typeof id === 'number' ? id : (id.length || 0);
+        ref.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2 + seed) * 0.08;
     }
   });
 
@@ -103,16 +105,26 @@ const InteractiveDevice = ({ id, position, args = [0.5, 0.5, 0.5], type = 'box',
       )}
       
       <Text 
-        position={[0, args[1] + 0.3, 0]} 
-        fontSize={0.25} 
-        color={isFound ? "#10b981" : (hovered ? "#fca5a5" : "#cbd5e1")} 
+        position={[0, (type === 'cylinder' ? args[0] : args[1]) + 0.5, 0]} 
+        fontSize={0.3} 
+        color={isFound ? "#10b981" : "#f87171"} 
+        anchorX="center" 
+        anchorY="bottom"
+        outlineWidth={0.03}
+        outlineColor="#000000"
+      >
+        {name}
+      </Text>
+      <Text 
+        position={[0, (type === 'cylinder' ? args[0] : args[1]) + 0.2, 0]} 
+        fontSize={0.2} 
+        color={isFound ? "#34d399" : "#ef4444"} 
         anchorX="center" 
         anchorY="bottom"
         outlineWidth={0.02}
         outlineColor="#000000"
-        fillOpacity={isFound ? 1 : 0.8}
       >
-        {isFound ? "OFF" : name}
+        {isFound ? "STATUS: OFF" : "STATUS: ON"}
       </Text>
     </group>
   );
