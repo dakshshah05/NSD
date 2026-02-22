@@ -215,14 +215,6 @@ const Impact = () => {
                     <p className="text-sm text-slate-400 mt-1">Which building is saving the most energy?</p>
                  </div>
                  
-                 {/* Mini 3D Trophy Context */}
-                 <div className="w-24 h-24 absolute top-2 right-4 hidden sm:block opacity-80 pointer-events-none">
-                     <Canvas camera={{ position: [0, 0, 4] }}>
-                         <ambientLight intensity={0.7} />
-                         <directionalLight position={[5, 5, 5]} intensity={1.5} />
-                         <Trophy3D />
-                     </Canvas>
-                 </div>
              </div>
 
              <div className="space-y-4">
