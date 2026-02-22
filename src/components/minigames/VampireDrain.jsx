@@ -126,7 +126,7 @@ const Flashlight = () => {
         const y = (pointer.y * viewport.height) / 2;
         
         // Position the point light at the cursor's world X/Y but pushed into the screen Z
-        lightRef.current.position.set(x, y + 2, 2);
+        lightRef.current.position.set(x, y + 1, 1.5);
       }
     });
   
@@ -134,8 +134,8 @@ const Flashlight = () => {
       <pointLight
         ref={lightRef}
         color="#ffffff"
-        intensity={15}
-        distance={12}
+        intensity={10}
+        distance={8}
         decay={2}
         castShadow
       />
@@ -143,12 +143,12 @@ const Flashlight = () => {
 };
 
 const INITIAL_DEVICES = [
-    { id: 1, name: 'Idle PC Monitor', power: 25, type: 'box', args: [1.2, 0.8, 0.1], position: [-2, -0.1, -3.7], color: '#cbd5e1' },
-    { id: 2, name: 'Phone Charger', power: 5, type: 'box', args: [0.15, 0.15, 0.2], position: [-3.5, -0.4, -3.7], color: '#f8fafc' },
-    { id: 3, name: 'TV on Standby', power: 15, type: 'box', args: [2.5, 1.4, 0.1], position: [3, 0.2, -3.8], color: '#334155' },
-    { id: 4, name: 'Game Console', power: 12, type: 'box', args: [0.8, 0.2, 0.6], position: [2.5, -0.9, -3.8], color: '#f8fafc' },
-    { id: 5, name: 'Coffee Maker', power: 8, type: 'cylinder', args: [0.3, 0.3, 0.6, 32], position: [-4.5, -1, 3], color: '#ef4444' },
-    { id: 6, name: 'Space Heater', power: 45, type: 'box', args: [0.6, 0.8, 0.3], position: [4, -1.6, 2], color: '#fb923c' },
+    { id: 1, name: 'Idle PC Monitor', power: 25, type: 'box', args: [1.6, 1.0, 0.15], position: [-1.8, 0, -3.7], color: '#cbd5e1' },
+    { id: 2, name: 'Phone Charger', power: 5, type: 'box', args: [0.2, 0.2, 0.25], position: [-3.5, -0.3, -3.7], color: '#f8fafc' },
+    { id: 3, name: 'TV on Standby', power: 15, type: 'box', args: [3.2, 1.8, 0.15], position: [2.5, 0.4, -3.8], color: '#334155' },
+    { id: 4, name: 'Game Console', power: 12, type: 'box', args: [1.2, 0.3, 0.8], position: [2.0, -0.8, -3.8], color: '#f8fafc' },
+    { id: 5, name: 'Coffee Maker', power: 8, type: 'cylinder', args: [0.4, 0.4, 0.8, 32], position: [-4.0, -0.8, 1.5], color: '#ef4444' },
+    { id: 6, name: 'Space Heater', power: 45, type: 'box', args: [0.8, 1.0, 0.4], position: [3.5, -1.4, 1.0], color: '#fb923c' },
 ];
 
 const VampireDrain = ({ onBack }) => {
@@ -265,9 +265,9 @@ const VampireDrain = ({ onBack }) => {
                 )}
 
                 {/* 3D Scene */}
-                <Canvas shadows camera={{ position: [0, 2, 10], fov: 50 }}>
+                <Canvas shadows camera={{ position: [0, 1.5, 3.5], fov: 45 }}>
                     {/* Very dim ambient light so the room isn't pitch black, but still dark */}
-                    <ambientLight intensity={0.2} />
+                    <ambientLight intensity={0.3} />
                     
                     {/* Dynamic Flashlight that follows mouse */}
                     {gameState === 'playing' && <Flashlight />}
@@ -293,7 +293,9 @@ const VampireDrain = ({ onBack }) => {
 
                     <OrbitControls 
                         enablePan={false} 
-                        enableZoom={false} 
+                        enableZoom={true} 
+                        minDistance={2}
+                        maxDistance={5}
                         minAzimuthAngle={-Math.PI / 4} 
                         maxAzimuthAngle={Math.PI / 4}
                         minPolarAngle={Math.PI / 4}
