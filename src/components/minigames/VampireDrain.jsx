@@ -117,25 +117,26 @@ const InteractiveDevice = ({ id, position, args = [0.5, 0.5, 0.5], type = 'box',
 // Flashlight tied to mouse position
 const Flashlight = () => {
     const lightRef = useRef();
-    const { camera, pointer } = useThree();
+    const { pointer, viewport } = useThree();
   
     useFrame(() => {
       if (lightRef.current) {
-        // Simple projection of mouse onto a plane at z=0 for the spotlight target
-        lightRef.current.position.set(camera.position.x, camera.position.y, camera.position.z);
-        lightRef.current.target.position.set(pointer.x * 5, pointer.y * 5, -5);
-        lightRef.current.target.updateMatrixWorld();
+        // Map pointer coordinates to world coordinates roughly
+        const x = (pointer.x * viewport.width) / 2;
+        const y = (pointer.y * viewport.height) / 2;
+        
+        // Position the point light at the cursor's world X/Y but pushed into the screen Z
+        lightRef.current.position.set(x, y + 2, 2);
       }
     });
   
     return (
-      <SpotLight
+      <pointLight
         ref={lightRef}
         color="#ffffff"
-        intensity={2}
-        distance={20}
-        angle={Math.PI / 6}
-        penumbra={0.5}
+        intensity={15}
+        distance={12}
+        decay={2}
         castShadow
       />
     );
@@ -264,9 +265,9 @@ const VampireDrain = ({ onBack }) => {
                 )}
 
                 {/* 3D Scene */}
-                <Canvas shadows camera={{ position: [0, 2, 8], fov: 60 }}>
+                <Canvas shadows camera={{ position: [0, 2, 10], fov: 50 }}>
                     {/* Very dim ambient light so the room isn't pitch black, but still dark */}
-                    <ambientLight intensity={0.1} />
+                    <ambientLight intensity={0.2} />
                     
                     {/* Dynamic Flashlight that follows mouse */}
                     {gameState === 'playing' && <Flashlight />}
