@@ -3,15 +3,16 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Sphere, Float, Stars, Text, useTexture } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Leaf, Zap, AlertTriangle, Send, ChevronRight, Droplets, Wind, UserCheck, Search, Users, Award } from 'lucide-react';
-import { useNotifications } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 // --- 3D Components ---
 
 const RealEarthGame = () => {
   const earthTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
   const sphereRef = useRef();
+  const navigate = useNavigate();
 
   useFrame((state) => {
     if (sphereRef.current) {
@@ -25,6 +26,9 @@ const RealEarthGame = () => {
         <Sphere 
           ref={sphereRef} 
           args={[1.6, 64, 64]} 
+          onClick={(e) => { e.stopPropagation(); navigate('/games'); }}
+          onPointerOver={() => document.body.style.cursor = 'pointer'}
+          onPointerOut={() => document.body.style.cursor = 'auto'}
         >
           <meshStandardMaterial 
             map={earthTexture}
@@ -33,6 +37,17 @@ const RealEarthGame = () => {
           />
         </Sphere>
       </Float>
+
+      <Text 
+          position={[0, -2.2, 0]} 
+          color="#10b981" 
+          fontSize={0.25}
+          fontWeight="bold"
+          anchorX="center"
+          anchorY="middle"
+      >
+          Click Earth to play Campus Grid Balancer!
+      </Text>
       
       <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
     </group>
