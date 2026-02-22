@@ -11,32 +11,47 @@ export const AuthProvider = ({ children }) => {
 
   // Helper to fetch role from DB
   const fetchUserRole = async (userId, email) => {
-
+    // 1. HARDCODED OVERRIDES (Highest Priority)
+    if (email === 'dakshshah215@gmail.com') {
+      setUserRole('admin');
+      return;
+    }
+    
     try {
-      const { data, error } = await supabase
+      // 2. Check if profile already exists in user_points
+      const { data: profile } = await supabase
         .from('user_points')
         .select('role')
         .eq('id', userId)
         .maybeSingle();
       
-      if (data?.role) {
-        setUserRole(data.role);
-      } else {
-        // If row doesn't exist, create it with default student role
-        const defaultRole = (email === 'daksh.kumar@bcah.christuniversity.in') ? 'student' : 'student';
-        
-        await supabase.from('user_points').insert([{
-           id: userId,
-           points: 0,
-           role: defaultRole,
-           display_name: email.split('@')[0]
-        }]);
-        
-        setUserRole(defaultRole);
-        console.log(`Created profile for ${email} with role ${defaultRole}`);
+      if (profile?.role) {
+        setUserRole(profile.role);
+        return;
       }
+
+      // 3. User is new or has no profile. Check if Admin PRE-AUTHORIZED this email in 'user_roles'
+      const { data: authorized } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('email', email.toLowerCase())
+        .maybeSingle();
+
+      const finalRole = authorized?.role || 'student';
+
+      // 4. Create the profile with the determined role
+      await supabase.from('user_points').insert([{
+         id: userId,
+         points: 0,
+         role: finalRole,
+         display_name: email.split('@')[0]
+      }]);
+      
+      setUserRole(finalRole);
+      console.log(`Synced authorized role for ${email}: ${finalRole}`);
+
     } catch (err) {
-      console.error("Error fetching/syncing role:", err);
+      console.error("Error syncing role:", err);
       setUserRole('student');
     }
   };

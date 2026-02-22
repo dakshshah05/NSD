@@ -48,7 +48,14 @@ const Settings = () => {
   const { addNotification } = useNotifications();
   const { isDarkMode, toggleTheme } = useTheme();
   const { settings, updateSetting } = useSettings();
-  const { user, signOut } = useAuth();
+  const { user, signOut, role } = useAuth();
+
+  // User Management State
+  const [authorizedUsers, setAuthorizedUsers] = useState([]);
+  const [newEmail, setNewEmail] = useState('');
+  const [newRole, setNewRole] = useState('student');
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   // Modal States
   const [showLogs, setShowLogs] = useState(false);
@@ -81,6 +88,55 @@ const Settings = () => {
      }
   }, [showLogs, user]);
 
+  useEffect(() => {
+    if (role === 'admin') {
+      fetchAuthorizedUsers();
+    }
+  }, [role]);
+
+  const fetchAuthorizedUsers = async () => {
+    setLoadingUsers(true);
+    const { data } = await supabase
+      .from('user_roles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (data) setAuthorizedUsers(data);
+    setLoadingUsers(false);
+  };
+
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    if (!newEmail) return;
+    setIsAddingUser(true);
+    
+    const { error } = await supabase
+      .from('user_roles')
+      .insert([{ email: newEmail.toLowerCase(), role: newRole }]);
+
+    if (error) {
+      addNotification('Error', 'Failed to authorize user. Maybe they already exist?');
+    } else {
+      addNotification('Success', `${newEmail} authorized as ${newRole}.`);
+      setNewEmail('');
+      fetchAuthorizedUsers();
+    }
+    setIsAddingUser(false);
+  };
+
+  const handleRemoveUser = async (email) => {
+    const { error } = await supabase
+      .from('user_roles')
+      .delete()
+      .eq('email', email);
+
+    if (error) {
+      addNotification('Error', 'Failed to remove user authorization.');
+    } else {
+      addNotification('Removed', `Access revoked for ${email}.`);
+      fetchAuthorizedUsers();
+    }
+  };
+
   const handleSave = () => {
       addNotification('Success', 'System configuration saved successfully.');
   };
@@ -106,6 +162,75 @@ const Settings = () => {
     <div className="max-w-4xl mx-auto animate-fade-in relative pb-12">
       <h2 className="text-2xl font-bold text-[rgb(var(--text-main))] mb-6">System Configuration</h2>
       
+      {/* Admin Only: User Management */}
+      {role === 'admin' && (
+        <SettingSection title="User Access Management" icon={User}>
+          <p className="text-sm text-[rgb(var(--text-muted))] mb-6">
+            Pre-authorize users and assign their roles before they register.
+          </p>
+          
+          <form onSubmit={handleAddUser} className="flex flex-col sm:flex-row gap-3 mb-8">
+            <input 
+              type="email" 
+              placeholder="User Email" 
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="flex-1 bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              required
+            />
+            <select 
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value)}
+              className="bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            >
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Administrator</option>
+            </select>
+            <button 
+              type="submit"
+              disabled={isAddingUser}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all disabled:opacity-50"
+            >
+              {isAddingUser ? 'Adding...' : 'Authorize User'}
+            </button>
+          </form>
+
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-[rgb(var(--text-muted))] uppercase tracking-wider">Authorized Access List</h4>
+            {loadingUsers ? (
+              <div className="text-center py-4 text-slate-500 animate-pulse text-sm">Loading user list...</div>
+            ) : authorizedUsers.length === 0 ? (
+              <div className="text-center py-4 text-slate-500 italic text-sm border border-dashed border-[rgb(var(--border))] rounded-lg">No special authorizations found.</div>
+            ) : (
+              <div className="grid gap-2">
+                {authorizedUsers.map(u => (
+                  <div key={u.email} className="flex items-center justify-between p-3 bg-[rgb(var(--bg-input))] rounded-lg border border-[rgb(var(--border))] group">
+                    <div className="flex items-center gap-3">
+                      <div className={clsx(
+                        "w-2 h-2 rounded-full",
+                        u.role === 'admin' ? "bg-purple-500" : u.role === 'teacher' ? "bg-blue-500" : "bg-emerald-500"
+                      )} />
+                      <span className="text-sm font-medium text-white">{u.email}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-bold uppercase tracking-tighter ring-1 ring-slate-700">
+                        {u.role}
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => handleRemoveUser(u.email)}
+                      className="text-slate-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-all"
+                      title="Revoke Access"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </SettingSection>
+      )}
+
       <SettingSection title="Notifications" icon={Bell}>
          <ToggleRow 
             label="Push Notifications" 
