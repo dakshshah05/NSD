@@ -274,7 +274,7 @@ const VampireDrain = ({ onBack }) => {
             </div>
 
             {/* Game Area */}
-            <div className="flex-1 relative overflow-hidden bg-black cursor-crosshair min-h-[600px] h-full">
+            <div className="relative overflow-hidden bg-black cursor-crosshair h-[700px] w-full">
                 
                 {/* Intro Screen */}
                 {gameState === 'start' && (
@@ -368,8 +368,8 @@ const VampireDrain = ({ onBack }) => {
                 {/* 3D Scene */}
                 <Canvas 
                     shadows 
-                    camera={{ position: [0, 2, 9], fov: 40 }}
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    camera={{ position: [0, 0, 10], fov: 40 }}
+                    style={{ background: '#000' }}
                 >
                     {/* Dim ambient light for silhouette visibility */}
                     <ambientLight intensity={0.4} />
@@ -401,7 +401,7 @@ const VampireDrain = ({ onBack }) => {
                         enableZoom={true} 
                         minDistance={3}
                         maxDistance={15}
-                        maxPolarAngle={Math.PI / 2.1}
+                        makeDefault
                     />
                 </Canvas>
             </div>
