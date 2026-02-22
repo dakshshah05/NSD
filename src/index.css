@@ -2,17 +2,34 @@
 
 @layer base {
   :root {
-    --bg-main: 2 6 23;
+    --bg-main: 2 6 23; 
     --bg-card: 15 23 42;
     --bg-input: 30 41 59;
     --border: 30 41 59;
-    --text-main: 255 255 255;
-    --text-sec: 226 232 240;
-    --text-muted: 148 163 184;
-    --accent: 99 102 241; /* Indigo 500 */
-    --accent-dark: 79 70 229; /* Indigo 600 */
+    --text-main: 255 255 255; 
+    --text-sec: 226 232 240; 
+    --text-muted: 148 163 184; 
+    --accent: 52 211 153; /* Emerald 400 */
+    --accent-dark: 16 185 129; /* Emerald 500 */
     color-scheme: dark;
   }
+}
+
+.light {
+  /* Light Mode (Green/Yellow Theme) */
+  --bg-main: 255 251 177; /* FFFBB1 (Cream) */
+  --bg-card: 248 250 220; /* Light variation of cream */
+  --bg-input: 216 233 131; /* D8E983 (Lime) - Inputs/Borders */
+  --border: 174 184 119; /* AEB877 (Olive) - Borders */
+
+  --text-main: 0 0 0; /* BLACK */
+  --text-sec: 30 30 30; /* Dark Grey */
+  --text-muted: 71 85 105; /* Slate 600 */
+
+  --accent: 85 107 47; /* Dark Olive Green for accents */
+  --accent-dark: 60 76 30; /* Darker Olive */
+
+  color-scheme: light;
 }
 
 body {
