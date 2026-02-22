@@ -1,3 +1,10 @@
+import React, { useState, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Stars, Float } from '@react-three/drei';
+import { Mail, Lock, UserPlus, ArrowRight, Eye, EyeOff, User, Shield, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const InteractiveNebula = () => {
