@@ -111,12 +111,15 @@ const Settings = () => {
     setIsAddingUser(true);
     
     try {
-      // Direct User Creation via Edge Function
-      const { data, error } = await supabase.functions.invoke('admin-create-user', {
-        body: { email: newEmail.toLowerCase(), password: newPassword, role: newRole }
+      // Direct User Creation via Database RPC (Cloud Dashboard Compatible)
+      const { data, error } = await supabase.rpc('admin_create_user', {
+        target_email: newEmail.toLowerCase(), 
+        target_password: newPassword, 
+        target_role: newRole 
       });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       addNotification('Success', `${newEmail} created successfully as ${newRole}.`);
       setNewEmail('');
@@ -124,7 +127,7 @@ const Settings = () => {
       fetchAuthorizedUsers();
     } catch (err) {
       console.error("Create User Error:", err);
-      addNotification('Error', err.message || 'Failed to create user. Ensure Edge Function is deployed.');
+      addNotification('Error', err.message || 'Failed to create user. Ensure SQL RPC is created in Supabase.');
     } finally {
       setIsAddingUser(false);
     }
