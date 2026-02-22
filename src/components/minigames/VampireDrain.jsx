@@ -274,7 +274,7 @@ const VampireDrain = ({ onBack }) => {
             </div>
 
             {/* Game Area */}
-            <div className="flex-1 relative overflow-hidden bg-black cursor-crosshair">
+            <div className="flex-1 relative overflow-hidden bg-black cursor-crosshair min-h-[600px] h-full">
                 
                 {/* Intro Screen */}
                 {gameState === 'start' && (
@@ -366,9 +366,13 @@ const VampireDrain = ({ onBack }) => {
                 )}
 
                 {/* 3D Scene */}
-                <Canvas shadows camera={{ position: [0, 3, 10], fov: 45 }}>
-                    {/* Very dim ambient light so the room isn't pitch black, but still dark */}
-                    <ambientLight intensity={0.6} />
+                <Canvas 
+                    shadows 
+                    camera={{ position: [0, 2, 9], fov: 40 }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                >
+                    {/* Dim ambient light for silhouette visibility */}
+                    <ambientLight intensity={0.4} />
                     
                     {/* Dynamic Flashlight that follows mouse */}
                     {gameState === 'playing' && <Flashlight />}
