@@ -5,6 +5,7 @@ import { Sparkles, Check, RefreshCw, Loader2, Calendar } from 'lucide-react';
 import { analyzeEnergyData } from '../services/gemini';
 import { useNotifications } from '../context/NotificationContext';
 import { useDate } from '../context/DateContext';
+import AIBrain3D from '../components/AIBrain3D';
 
 const Recommendations = () => {
   const [recommendations, setRecommendations] = useState([]);
@@ -94,7 +95,7 @@ const Recommendations = () => {
 
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-2xl">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+         <AIBrain3D />
          <div className="relative z-10 max-w-4xl">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>

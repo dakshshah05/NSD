@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import ThreeBackground from './ThreeBackground';
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -22,7 +23,9 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="h-screen bg-[rgb(var(--bg-main))] text-[rgb(var(--text-main))] flex overflow-hidden transition-colors duration-300">
+    <div className="h-screen relative text-[rgb(var(--text-main))] flex overflow-hidden transition-colors duration-300">
+      <ThreeBackground />
+      
       {/* Sidebar */}
       <Sidebar 
         isOpen={isSidebarOpen} 
@@ -30,7 +33,7 @@ const Layout = ({ children }) => {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 h-full">
+      <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 h-full relative z-10">
         <Header 
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
           title={getPageTitle(location.pathname)}

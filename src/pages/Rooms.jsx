@@ -31,8 +31,8 @@ const Rooms = () => {
 
   // Filter logic
   const filteredRooms = roomStatusData.filter(room => {
-    const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          room.block.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (room.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
+                          (room.block?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     
     let matchesFilter = true;
     if (filter === 'occupied') matchesFilter = room.status === 'occupied';

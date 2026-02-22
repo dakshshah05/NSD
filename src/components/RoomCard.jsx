@@ -26,6 +26,7 @@ const RoomCard = ({ room, onClick }) => {
   } else if (room.power > 500 && room.status === 'occupied') { 
     statusColor = "border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.1)]";
     statusBadge = isDarkMode
+    statusBadge = isDarkMode
       ? "bg-yellow-500/20 text-yellow-300"
       : "bg-yellow-500/20 text-[#422006]";
     statusText = "High Load";
