@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import emailjs from '@emailjs/browser';
 
 // --- 3D Components ---
 
@@ -133,12 +134,36 @@ const Impact = () => {
           await supabase.rpc('add_green_points', { user_id: user.id, points_to_add: 50 });
       }
 
-      setTimeout(() => {
-          setIsSubmitting(false);
-          setReportLocation('');
-          addNotification('Report Submitted', `Thank you for reporting wastage at ${reportLocation}! +50 Green Points awarded.`, 'success');
-          fetchLeaderboard(); // Refresh leaderboard
-      }, 1000);
+      // SEND EMAIL NOTIFICATION TO ADMIN
+      try {
+          const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+          const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+          const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+          if (serviceId && templateId && publicKey) {
+              await emailjs.send(
+                  serviceId,
+                  templateId,
+                  {
+                      to_email: 'dakshshah215@gmail.com', // Admin Email
+                      subject: `NEW CAMPUS WATCH REPORT: ${reportType.toUpperCase()}`,
+                      message: `A new wastage report has been submitted.\n\nType: ${reportType}\nLocation: ${reportLocation}\nReported by: ${user?.email || 'Anonymous Student'}`,
+                      date: new Date().toLocaleDateString(),
+                      filename: 'N/A'
+                  },
+                  publicKey
+              );
+              console.log("Admin notified via email.");
+          }
+      } catch (err) {
+          console.error("Failed to notify admin via email:", err);
+      }
+
+      // Wrap up submission
+      setIsSubmitting(false);
+      setReportLocation('');
+      addNotification('Report Submitted', `Thank you for reporting wastage at ${reportLocation}! +50 Green Points awarded.`, 'success');
+      fetchLeaderboard(); // Refresh leaderboard
   };
 
   return (
