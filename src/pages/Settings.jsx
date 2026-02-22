@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Shield, User, Smartphone, Save, X, AlertTriangle, Trash2, Key, Activity, Loader2 } from 'lucide-react';
+import { Bell, Shield, Smartphone, Save, X, AlertTriangle, Trash2, Activity, Loader2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useNotifications } from '../context/NotificationContext';
 import { useTheme } from '../context/ThemeContext';
