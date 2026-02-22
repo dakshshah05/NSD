@@ -32,10 +32,16 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .maybeSingle();
       
+      // 4. Lookup User Metadata (New: Catch roles from registration)
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const metaRole = currentUser?.user_metadata?.role;
+
       // Determine the best role
       let finalRole = 'student';
       if (authorized) {
         finalRole = authorized.role;
+      } else if (metaRole) {
+        finalRole = metaRole;
       } else if (profile) {
         finalRole = profile.role;
       }
@@ -49,13 +55,16 @@ export const AuthProvider = ({ children }) => {
            display_name: email.split('@')[0]
         }]);
         console.log(`Created profile for ${email} with role: ${finalRole}`);
-      } else if (authorized && profile.role !== authorized.role) {
-        // 4b. UPDATE profile if authorization exists and differs from current role
+      } else if ( (authorized && profile.role !== authorized.role) || (metaRole && profile.role !== metaRole) ) {
+        // 4b. UPDATE profile if authorization or metadata exists and differs from current role
+        // Authorized (whitelist) still takes precedence over metadata
+        const roleToUpdate = authorized ? authorized.role : metaRole;
+        
         await supabase.from('user_points')
-          .update({ role: authorized.role })
+          .update({ role: roleToUpdate })
           .eq('id', userId);
-        console.log(`Upgraded role for ${email} to: ${authorized.role}`);
-        finalRole = authorized.role;
+        console.log(`Updated role for ${email} to: ${roleToUpdate}`);
+        finalRole = roleToUpdate;
       }
 
       setUserRole(finalRole);
@@ -110,8 +119,14 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
-  const register = (email, password) => {
-    return supabase.auth.signUp({ email, password });
+  const register = (email, password, role = 'student') => {
+    return supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        data: { role }
+      }
+    });
   };
 
   const value = {

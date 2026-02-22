@@ -66,6 +66,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('student');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
@@ -86,7 +87,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { error } = await register(email, password);
+      const { error } = await register(email, password, role);
       if (error) throw error;
       
       addNotification('Success', 'Registration successful! You log in with your credentials.');
@@ -125,6 +126,29 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
+            {/* Role Selection */}
+            <div className="grid grid-cols-3 gap-3 mb-2">
+              {[
+                { id: 'student', icon: User, label: 'Student' },
+                { id: 'teacher', icon: Shield, label: 'Teacher' },
+                { id: 'admin', icon: Activity, label: 'Admin' }
+              ].map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setRole(r.id)}
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
+                    role === r.id 
+                    ? 'bg-blue-500/20 border-blue-500 text-blue-400' 
+                    : 'bg-slate-800/30 border-slate-700 text-slate-400 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <r.icon className="w-5 h-5 mb-1" />
+                  <span className="text-[10px] uppercase tracking-wider font-bold">{r.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Mail className="h-5 w-5 text-slate-400" />

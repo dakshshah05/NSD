@@ -52,10 +52,6 @@ const Settings = () => {
 
   // User Management State
   const [authorizedUsers, setAuthorizedUsers] = useState([]);
-  const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState('student');
-  const [isAddingUser, setIsAddingUser] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   // Modal States
@@ -105,50 +101,6 @@ const Settings = () => {
     setLoadingUsers(false);
   };
 
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    if (!newEmail || !newPassword) return;
-    setIsAddingUser(true);
-    
-    try {
-      console.log("Attempting to create user via RPC:", { email: newEmail, role: newRole });
-      
-      // Direct User Creation via Database RPC (Cloud Dashboard Compatible)
-      const { data, error } = await supabase.rpc('admin_create_user', {
-        target_email: newEmail.toLowerCase(), 
-        target_password: newPassword, 
-        target_role: newRole 
-      });
-
-      if (error) {
-        console.error("Supabase RPC Error:", error);
-        throw new Error(`Database Error: ${error.message}. Did you run the SQL code in Supabase?`);
-      }
-
-      if (data?.error) {
-        console.error("RPC Logic Error:", data.error);
-        alert(`Creation Failed: ${data.error}`);
-        throw new Error(data.error);
-      }
-
-      alert("Success! Account created successfully.");
-      addNotification('Success', `Account for ${newEmail} is ready!`);
-      setNewEmail('');
-      setNewPassword('');
-      fetchAuthorizedUsers();
-    } catch (err) {
-      console.error("Full Creation Error:", err);
-      const errorMsg = err.message || 'Unknown error occurred.';
-      alert(`Error: ${errorMsg}`);
-      addNotification('Creation Failed', errorMsg);
-      
-      if (errorMsg.includes('not found')) {
-        addNotification('Instruction', 'Please run the SQL code provided in the repair guide.');
-      }
-    } finally {
-      setIsAddingUser(false);
-    }
-  };
 
   const handleRemoveUser = async (email) => {
     if (!window.confirm(`Are you sure you want to PERMANENTLY delete account ${email}?`)) return;
@@ -196,47 +148,10 @@ const Settings = () => {
       
       {/* Admin Only: User Management */}
       {role === 'admin' && (
-        <SettingSection title="User Access Management" icon={User}>
+        <SettingSection title="Authorized Access Management" icon={Key}>
           <p className="text-sm text-[rgb(var(--text-muted))] mb-6">
-            Create new user accounts directly. They can log in immediately with the password you set.
+            View and manage users with special permissions (Teacher/Admin).
           </p>
-          
-          <form onSubmit={handleAddUser} className="flex flex-col gap-3 mb-8">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input 
-                type="email" 
-                placeholder="User Email" 
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                className="flex-[2] bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                required
-              />
-              <input 
-                type="password" 
-                placeholder="Set Password" 
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="flex-1 bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                required
-              />
-              <select 
-                value={newRole}
-                onChange={(e) => setNewRole(e.target.value)}
-                className="bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              >
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-                <option value="admin">Administrator</option>
-              </select>
-            </div>
-            <button 
-              type="submit"
-              disabled={isAddingUser}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 shadow-lg shadow-emerald-900/20"
-            >
-              {isAddingUser ? 'Creating Account...' : 'Create Account Now'}
-            </button>
-          </form>
 
 
           <div className="space-y-3">
