@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Sphere, MeshDistortMaterial, Float, Stars, Text } from '@react-three/drei';
+import { OrbitControls, Sphere, Float, Stars, Text, useTexture } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Leaf, Zap, AlertTriangle, Send, ChevronRight, Droplets, Wind, UserCheck, Search, Users, Award } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
@@ -9,34 +9,87 @@ import { supabase } from '../lib/supabaseClient';
 
 // --- 3D Components ---
 
-const FuturisticGlobe = () => {
+const RealEarthGame = () => {
+  const earthTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
   const sphereRef = useRef();
-  
+  const [clicks, setClicks] = useState(0);
+  const [popups, setPopups] = useState([]);
+
   useFrame((state) => {
     if (sphereRef.current) {
-        sphereRef.current.rotation.y += 0.005;
-        sphereRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+        sphereRef.current.rotation.y += 0.002;
     }
   });
 
+  const handleClick = (e) => {
+      e.stopPropagation();
+      setClicks(c => c + 1);
+      
+      const newPopup = {
+          id: Date.now(),
+          position: [e.point.x, e.point.y + 0.5, e.point.z],
+      };
+      setPopups(curr => [...curr, newPopup]);
+      
+      // remove popup after 1s
+      setTimeout(() => {
+          setPopups(curr => curr.filter(p => p.id !== newPopup.id));
+      }, 1000);
+      
+      // bounce the earth slightly
+      if (sphereRef.current) {
+         sphereRef.current.scale.set(1.1, 1.1, 1.1);
+         setTimeout(() => {
+            if (sphereRef.current) sphereRef.current.scale.set(1, 1, 1);
+         }, 100);
+      }
+  };
+
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-      <Sphere ref={sphereRef} args={[1, 64, 64]} scale={1.8}>
-        <MeshDistortMaterial 
+    <group>
+      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+        <Sphere 
+          ref={sphereRef} 
+          args={[1.6, 64, 64]} 
+          onClick={handleClick}
+          onPointerOver={() => document.body.style.cursor = 'pointer'}
+          onPointerOut={() => document.body.style.cursor = 'auto'}
+        >
+          <meshStandardMaterial 
+            map={earthTexture}
+            roughness={0.6}
+            metalness={0.1}
+          />
+        </Sphere>
+      </Float>
+
+      {/* Click Popups */}
+      {popups.map(p => (
+          <Text 
+             key={p.id} 
+             position={p.position} 
+             color="#10b981" 
+             fontSize={0.25}
+             fontWeight="bold"
+             anchorX="center" 
+             anchorY="middle"
+          >
+             +1 Cleaned
+          </Text>
+      ))}
+
+      {/* Score */}
+      <Text 
+          position={[0, -2.2, 0]} 
           color="#10b981" 
-          emissive="#059669"
-          emissiveIntensity={0.5}
-          wireframe={true}
-          distort={0.3} 
-          speed={2} 
-          roughness={0.2}
-        />
-      </Sphere>
-      {/* Glow effect behind the globe */}
-      <Sphere args={[1.2, 32, 32]} scale={1.9} position={[0, 0, -0.5]}>
-          <meshBasicMaterial color="#10b981" transparent opacity={0.1} />
-      </Sphere>
-    </Float>
+          fontSize={0.35}
+          fontWeight="bold"
+      >
+          {clicks > 0 ? `Earth Cleaned: ${clicks} times!` : 'Spin to explore. Click to clean!'}
+      </Text>
+      
+      <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+    </group>
   );
 };
 
@@ -134,11 +187,13 @@ const Impact = () => {
          {/* 3D Canvas Background */}
          <div className="absolute inset-0 z-0">
              <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-                 <ambientLight intensity={0.5} />
-                 <directionalLight position={[10, 10, 5]} intensity={1} color="#10b981" />
+                 <ambientLight intensity={0.8} />
+                 <directionalLight position={[10, 10, 5]} intensity={2} color="#ffffff" />
                  <pointLight position={[-10, -10, -5]} intensity={0.5} color="#0284c7" />
                  <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-                 <FuturisticGlobe />
+                 <React.Suspense fallback={null}>
+                     <RealEarthGame />
+                 </React.Suspense>
              </Canvas>
          </div>
 
