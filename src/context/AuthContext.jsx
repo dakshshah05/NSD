@@ -12,13 +12,17 @@ export const AuthProvider = ({ children }) => {
   // Helper to fetch role from DB
   const fetchUserRole = async (userId, email) => {
     // HARDCODED OVERRIDES FOR ROLES
-    if (email === 'daksh.kumar@bcah.christuniversity.in') {
+    if (email === 'dakshshah215@gmail.com' || email === 'dkashshah215@gmail.com') {
       setUserRole('admin');
       return;
     }
     
+    if (email === 'daksh.kumar@bcah.christuniversity.in') {
+      setUserRole('student');
+      return;
+    }
+    
     // Add additional overrides here if needed
-    // if (email === 'student@example.com') { setUserRole('student'); return; }
     // if (email === 'teacher@example.com') { setUserRole('teacher'); return; }
 
     try {
