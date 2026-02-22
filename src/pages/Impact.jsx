@@ -109,6 +109,7 @@ const Impact = () => {
       const { data } = await supabase
           .from('user_points')
           .select('display_name, points')
+          .eq('role', 'student')
           .order('points', { ascending: false })
           .limit(5);
       if (data) setTopUsers(data);
