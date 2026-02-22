@@ -195,7 +195,7 @@ const Reports = () => {
       
       <div className="p-4 bg-[rgb(var(--bg-card))]/50 border border-[rgb(var(--border))] rounded-xl text-center text-sm text-[rgb(var(--text-muted))]">
          <p>Reports are automatically emailed to <span className="font-semibold text-[rgb(var(--text-main))]">{user?.email || 'dakshshah215@gmail.com'}</span> upon generation.</p>
-         <p className="mt-1 text-xs opacity-70">Need custom reports? Contact your System Administrator.</p>
+         <p className="mt-1 text-xs opacity-70">Need custom reports? <a href="mailto:dakshshah215@gmail.com?subject=Custom Report Request" className="underline hover:text-emerald-400 transition-colors">Contact your System Administrator.</a></p>
       </div>
     </div>
   );
