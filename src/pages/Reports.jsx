@@ -6,9 +6,11 @@ import emailjs from '@emailjs/browser';
 
 import { useNotifications } from '../context/NotificationContext'; 
 import { useSettings } from '../context/SettingsContext';
+import { useAuth } from '../context/AuthContext';
 // ...
 const Reports = () => {
   const { selectedDate } = useDate();
+  const { user } = useAuth();
   
   // Debugging Context
   const notifCtx = useNotifications();
@@ -71,8 +73,11 @@ const Reports = () => {
       link.click();
       document.body.removeChild(link);
       
+      // Determine recipient email
+      const recipientEmail = user?.email || 'dakshshah215@gmail.com';
+      
       // ALWAYS NOTIFY & EMAIL
-      addNotification('Sending Report', `Emailing ${filename} to dakshshah215@gmail.com...`);
+      addNotification('Sending Report', `Emailing ${filename} to ${recipientEmail}...`);
       
       try {
           // Verify env variables are present before sending
@@ -86,16 +91,21 @@ const Reports = () => {
               return;
           }
 
+          // Convert CSV to Base64 Data URI for EmailJS attachment
+          const base64Csv = btoa(unescape(encodeURIComponent(csvContent)));
+          const csvDataUri = `data:text/csv;base64,${base64Csv}`;
+
           // Send via EmailJS
           await emailjs.send(
               serviceId,
               templateId,
               {
-                  to_email: 'dakshshah215@gmail.com',
+                  to_email: recipientEmail,
                   subject: `EnergyGuard Report: ${filename}`,
                   message: `Please find the generated report data for ${selectedDate}.`,
-                  csv_data: csvContent, 
-                  date: selectedDate
+                  csv_data: csvDataUri, 
+                  date: selectedDate,
+                  filename: filename
               },
               publicKey
           );
@@ -184,7 +194,7 @@ const Reports = () => {
       </div>
       
       <div className="p-4 bg-[rgb(var(--bg-card))]/50 border border-[rgb(var(--border))] rounded-xl text-center text-sm text-[rgb(var(--text-muted))]">
-         <p>Reports are automatically emailed to <span className="font-semibold text-[rgb(var(--text-main))]">dakshshah215@gmail.com</span> upon generation.</p>
+         <p>Reports are automatically emailed to <span className="font-semibold text-[rgb(var(--text-main))]">{user?.email || 'dakshshah215@gmail.com'}</span> upon generation.</p>
          <p className="mt-1 text-xs opacity-70">Need custom reports? Contact your System Administrator.</p>
       </div>
     </div>
