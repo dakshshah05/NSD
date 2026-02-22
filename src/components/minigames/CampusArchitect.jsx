@@ -51,7 +51,7 @@ const CampusArchitect = ({ onBack }) => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-900 rounded-3xl overflow-hidden relative border border-slate-700 shadow-2xl">
+        <div className="flex flex-col min-h-[85vh] bg-slate-900 rounded-3xl overflow-hidden relative border border-slate-700 shadow-2xl">
             {/* Header */}
             <div className="bg-slate-950 p-6 flex justify-between items-center z-20 border-b border-slate-800">
                 <div>

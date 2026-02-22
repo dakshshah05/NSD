@@ -42,7 +42,7 @@ const EnergySorter = ({ onBack }) => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-900 rounded-3xl overflow-hidden relative border border-slate-700 shadow-2xl">
+        <div className="flex flex-col min-h-[85vh] bg-slate-900 rounded-3xl overflow-hidden relative border border-slate-700 shadow-2xl">
             {/* Header */}
             <div className="bg-slate-950 p-6 flex justify-between items-center z-20 border-b border-slate-800">
                 <div>
@@ -93,10 +93,10 @@ const EnergySorter = ({ onBack }) => {
                         </AnimatePresence>
 
                         <div className="flex gap-4 w-full">
-                            <button onClick={() => handleSort(false)} className="flex-1 bg-red-600/20 hover:bg-red-600/40 border-2 border-red-500/50 text-red-400 py-6 rounded-2xl font-bold text-lg flex flex-col items-center gap-2 transition-all">
+                            <button onClick={() => handleSort(false)} className="flex-1 bg-red-600/20 hover:bg-red-600/40 border-2 border-red-500/50 text-red-400 py-4 rounded-2xl font-bold text-lg flex flex-col items-center gap-2 transition-all">
                                 <Trash2 size={28} /> Waste
                             </button>
-                            <button onClick={() => handleSort(true)} className="flex-1 bg-emerald-600/20 hover:bg-emerald-600/40 border-2 border-emerald-500/50 text-emerald-400 py-6 rounded-2xl font-bold text-lg flex flex-col items-center gap-2 transition-all">
+                            <button onClick={() => handleSort(true)} className="flex-1 bg-emerald-600/20 hover:bg-emerald-600/40 border-2 border-emerald-500/50 text-emerald-400 py-4 rounded-2xl font-bold text-lg flex flex-col items-center gap-2 transition-all">
                                 <Recycle size={28} /> Eco
                             </button>
                         </div>

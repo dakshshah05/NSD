@@ -77,9 +77,7 @@ const MiniGames = () => {
     if (selectedGame === 'timetable_optimizer') return <TimetableOptimizer onBack={handleBack} />;
 
     return (
-        <div className="flex flex-col h-full bg-[rgb(var(--bg-main))] text-white animate-fade-in relative">
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-sky-500/10 rounded-full blur-[120px] -z-10 pointer-events-none" />
-            
+        <div className="flex flex-col min-h-full text-white animate-fade-in relative pb-10">
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div>
@@ -111,7 +109,7 @@ const MiniGames = () => {
                             whileHover={{ scale: 1.02, y: -5 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setSelectedGame(game.id)}
-                            className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] hover:border-slate-500 rounded-3xl p-6 text-left relative overflow-hidden group shadow-xl transition-all h-full flex flex-col"
+                            className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] hover:border-slate-500 rounded-3xl p-6 text-left relative overflow-hidden group shadow-xl transition-all flex flex-col min-h-[280px]"
                         >
                             {/* Hover Gradient Background */}
                             <div className={`absolute inset-0 bg-gradient-to-br ${game.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
@@ -149,7 +147,7 @@ const MiniGames = () => {
                          initial={{ opacity: 0, y: 20 }}
                          animate={{ opacity: 1, y: 0 }}
                          transition={{ delay: GAMES.length * 0.1 }}
-                         className="bg-[rgb(var(--bg-card))] border border-dashed border-slate-700/50 rounded-3xl p-6 flex flex-col items-center justify-center text-center opacity-50"
+                         className="bg-[rgb(var(--bg-card))] border border-dashed border-slate-700/50 rounded-3xl p-6 flex flex-col items-center justify-center text-center opacity-50 min-h-[280px]"
                     >
                         <Gamepad2 size={48} className="text-slate-600 mb-4" />
                         <h3 className="text-xl font-bold text-slate-400 mb-2">More Games Coming Soon</h3>
