@@ -127,17 +127,19 @@ const Settings = () => {
 
       if (data?.error) {
         console.error("RPC Logic Error:", data.error);
+        alert(`Creation Failed: ${data.error}`);
         throw new Error(data.error);
       }
 
+      alert("Success! Account created successfully.");
       addNotification('Success', `Account for ${newEmail} is ready!`);
       setNewEmail('');
       setNewPassword('');
       fetchAuthorizedUsers();
     } catch (err) {
       console.error("Full Creation Error:", err);
-      // Explicitly tell the user what to do
       const errorMsg = err.message || 'Unknown error occurred.';
+      alert(`Error: ${errorMsg}`);
       addNotification('Creation Failed', errorMsg);
       
       if (errorMsg.includes('not found')) {
