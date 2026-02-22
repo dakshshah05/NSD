@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Box, Cylinder, Sphere, useCursor, Text, SpotLight, Plane } from '@react-three/drei';
 import { motion } from 'framer-motion';
-import { Power, Timer, Award, RotateCcw } from 'lucide-react';
+import { Power, Timer, Award, RotateCcw, AlertCircle } from 'lucide-react';
+import { fetchRoomStatus } from '../../data/historicalData';
+import { supabase } from '../../lib/supabaseClient';
 
 const GAME_TIME = 20;
 
@@ -160,11 +162,51 @@ const VampireDrain = ({ onBack }) => {
     // Memos for easy checking
     const allFound = devices.every(d => d.found);
 
-    const startGame = () => {
-        setDevices(INITIAL_DEVICES.map(d => ({ ...d, found: false })));
-        setTimeLeft(GAME_TIME);
-        setScore(0);
-        setGameState('playing');
+    const startGame = async () => {
+        setGameState('loading');
+        
+        try {
+            // Fetch live data from Supabase real life DB
+            const rooms = await fetchRoomStatus();
+            
+            // Filter rooms that actually have things turned ON (wasting power)
+            const wastingRooms = rooms.filter(r => r.lights || r.fans);
+            
+            if (wastingRooms.length === 0) {
+                // No actual rooms are wasting energy! 
+                setGameState('no_loads');
+                return;
+            }
+
+            // Map the real life rooms to our 3D devices
+            // We use the room ID as the device ID so we can toggle it back
+            let activeDevices = wastingRooms.slice(0, 6).map((room, index) => {
+                // Alternate between Box and Cylinder shapes just for visual variety
+                const baseDevice = INITIAL_DEVICES[index % INITIAL_DEVICES.length];
+                return {
+                    ...baseDevice,
+                    id: room.id,
+                    realRoomName: room.name,
+                    name: room.lights && room.fans ? 'Lights & Fans' : (room.lights ? 'Left-on Lights' : 'Spinning Fan'),
+                    power: room.power || 30, // Use actual wattage if present
+                    found: false,
+                    isLightInfo: room.lights,
+                    isFanInfo: room.fans,
+                };
+            });
+
+            setDevices(activeDevices);
+            setTimeLeft(GAME_TIME);
+            setScore(0);
+            setGameState('playing');
+        } catch (error) {
+            console.error("Failed to load real life devices:", error);
+            // Fallback to static if DB fails
+            setDevices(INITIAL_DEVICES.map(d => ({ ...d, found: false })));
+            setTimeLeft(GAME_TIME);
+            setScore(0);
+            setGameState('playing');
+        }
     };
 
     useEffect(() => {
@@ -182,11 +224,26 @@ const VampireDrain = ({ onBack }) => {
         return () => clearInterval(timer);
     }, [timeLeft, gameState, allFound]);
 
-    const handleUnplug = (id, power) => {
+    const handleUnplug = async (id, power) => {
         if (gameState !== 'playing') return;
         
+        // Optimistically update UI
         setDevices(prev => prev.map(d => d.id === id ? { ...d, found: true } : d));
         setScore(s => s + power);
+
+        // ACTUALLY Turn it off in real life (Supabase)
+        const targetDevice = devices.find(d => d.id === id);
+        if (targetDevice && targetDevice.realRoomName) {
+            try {
+                await supabase
+                    .from('room_status')
+                    .update({ lights: false, fans: false, power: 0 })
+                    .eq('id', id);
+                console.log(`Successfully turned off ${targetDevice.realRoomName} via Vampire Drain 3D!`);
+            } catch (error) {
+                console.error("Failed to update real life switch:", error);
+            }
+        }
     };
 
     return (
@@ -260,6 +317,33 @@ const VampireDrain = ({ onBack }) => {
                                     Back to Hub
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Loading State or No Loads State */}
+                {gameState === 'loading' && (
+                    <div className="absolute inset-0 flex items-center justify-center z-30 bg-slate-900/80 backdrop-blur-md">
+                        <div className="flex flex-col items-center">
+                            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <p className="text-white font-bold animate-pulse">Scanning Campus Rooms...</p>
+                        </div>
+                    </div>
+                )}
+
+                {gameState === 'no_loads' && (
+                    <div className="absolute inset-0 flex items-center justify-center z-30 bg-slate-900/80 backdrop-blur-md">
+                        <div className="bg-slate-900 border border-slate-700 p-8 rounded-3xl max-w-lg text-center shadow-2xl backdrop-blur-md">
+                            <AlertCircle size={64} className="text-emerald-500 mx-auto mb-6" />
+                            <h3 className="text-3xl font-black text-white mb-4">You did it!</h3>
+                            <p className="text-slate-300 mb-8 leading-relaxed">
+                                Our campus is incredibly efficient right now. There are NO rooms currently wasting power with lights or fans left on.
+                                <br/><br/>
+                                Check back later to see if any new phantom loads appear.
+                            </p>
+                            <button onClick={onBack} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold transition-all w-full">
+                                Back to Hub
+                            </button>
                         </div>
                     </div>
                 )}
