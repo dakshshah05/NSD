@@ -12,8 +12,6 @@ import { supabase } from '../lib/supabaseClient';
 const RealEarthGame = () => {
   const earthTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
   const sphereRef = useRef();
-  const [clicks, setClicks] = useState(0);
-  const [popups, setPopups] = useState([]);
 
   useFrame((state) => {
     if (sphereRef.current) {
@@ -21,39 +19,12 @@ const RealEarthGame = () => {
     }
   });
 
-  const handleClick = (e) => {
-      e.stopPropagation();
-      setClicks(c => c + 1);
-      
-      const newPopup = {
-          id: Date.now(),
-          position: [e.point.x, e.point.y + 0.5, e.point.z],
-      };
-      setPopups(curr => [...curr, newPopup]);
-      
-      // remove popup after 1s
-      setTimeout(() => {
-          setPopups(curr => curr.filter(p => p.id !== newPopup.id));
-      }, 1000);
-      
-      // bounce the earth slightly
-      if (sphereRef.current) {
-         sphereRef.current.scale.set(1.1, 1.1, 1.1);
-         setTimeout(() => {
-            if (sphereRef.current) sphereRef.current.scale.set(1, 1, 1);
-         }, 100);
-      }
-  };
-
   return (
     <group>
       <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
         <Sphere 
           ref={sphereRef} 
           args={[1.6, 64, 64]} 
-          onClick={handleClick}
-          onPointerOver={() => document.body.style.cursor = 'pointer'}
-          onPointerOut={() => document.body.style.cursor = 'auto'}
         >
           <meshStandardMaterial 
             map={earthTexture}
@@ -62,31 +33,6 @@ const RealEarthGame = () => {
           />
         </Sphere>
       </Float>
-
-      {/* Click Popups */}
-      {popups.map(p => (
-          <Text 
-             key={p.id} 
-             position={p.position} 
-             color="#10b981" 
-             fontSize={0.25}
-             fontWeight="bold"
-             anchorX="center" 
-             anchorY="middle"
-          >
-             +1 Cleaned
-          </Text>
-      ))}
-
-      {/* Score */}
-      <Text 
-          position={[0, -2.2, 0]} 
-          color="#10b981" 
-          fontSize={0.35}
-          fontWeight="bold"
-      >
-          {clicks > 0 ? `Earth Cleaned: ${clicks} times!` : 'Spin to explore. Click to clean!'}
-      </Text>
       
       <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
     </group>
