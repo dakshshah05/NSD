@@ -11,19 +11,6 @@ export const AuthProvider = ({ children }) => {
 
   // Helper to fetch role from DB
   const fetchUserRole = async (userId, email) => {
-    // HARDCODED OVERRIDES FOR ROLES
-    if (email === 'dakshshah215@gmail.com' || email === 'dkashshah215@gmail.com') {
-      setUserRole('admin');
-      return;
-    }
-    
-    if (email === 'daksh.kumar@bcah.christuniversity.in') {
-      setUserRole('student');
-      return;
-    }
-    
-    // Add additional overrides here if needed
-    // if (email === 'teacher@example.com') { setUserRole('teacher'); return; }
 
     try {
       const { data, error } = await supabase
@@ -36,11 +23,20 @@ export const AuthProvider = ({ children }) => {
         setUserRole(data.role);
       } else {
         // If row doesn't exist, create it with default student role
-        setUserRole('student');
-        console.log("No role found, defaulting to student");
+        const defaultRole = (email === 'daksh.kumar@bcah.christuniversity.in') ? 'student' : 'student';
+        
+        await supabase.from('user_points').insert([{
+           id: userId,
+           points: 0,
+           role: defaultRole,
+           display_name: email.split('@')[0]
+        }]);
+        
+        setUserRole(defaultRole);
+        console.log(`Created profile for ${email} with role ${defaultRole}`);
       }
     } catch (err) {
-      console.error("Error fetching role:", err);
+      console.error("Error fetching/syncing role:", err);
       setUserRole('student');
     }
   };

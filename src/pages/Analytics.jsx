@@ -15,7 +15,7 @@ import { motion } from 'framer-motion';
 
 const Analytics = () => {
   const { selectedDate } = useDate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { addNotification } = useNotifications();
   const [dayData, setDayData] = useState(null);
   const [anomalies, setAnomalies] = useState([]);
@@ -50,8 +50,8 @@ const Analytics = () => {
       setIsReporting(prev => ({ ...prev, [anomalyId]: true }));
 
       try {
-          // 1. Award 50 points to the user
-          if (user?.id) {
+          // 1. Award 50 points to the user (STUDENTS ONLY)
+          if (user?.id && role === 'student') {
               await supabase.rpc('add_green_points', { user_id: user.id, points_to_add: 50 });
           }
 

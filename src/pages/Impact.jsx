@@ -99,7 +99,7 @@ const HOSTEL_RANKINGS = [
 
 const Impact = () => {
   const { addNotification } = useNotifications();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [reportType, setReportType] = useState('electricity');
   const [reportLocation, setReportLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -128,9 +128,8 @@ const Impact = () => {
       if(!reportLocation) return;
       
       setIsSubmitting(true);
-      
-      // Award 50 points to the user in Supabase
-      if (user?.id) {
+      // Award 50 points to the user in Supabase (STUDENTS ONLY)
+      if (user?.id && role === 'student') {
           await supabase.rpc('add_green_points', { user_id: user.id, points_to_add: 50 });
       }
 
