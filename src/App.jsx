@@ -43,7 +43,9 @@ function App() {
                     <Route path="/games" element={<MiniGames />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/notifications" element={<Notifications />} />
-                    <Route path="/recommendations" element={<Recommendations />} />
+                    <Route path="/recommendations" element={
+                        <ProtectedRoute allowedRoles={['admin', 'teacher']}><Recommendations /></ProtectedRoute>
+                    } />
 
                     {/* Teacher & Admin Routes */}
                     <Route path="/rooms" element={

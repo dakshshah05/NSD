@@ -53,7 +53,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: "Campus Gamification & Impact", path: "/impact", icon: Globe, roles: ['admin', 'teacher', 'student'] },
     { name: "Live Rooms", path: "/rooms", icon: Zap, roles: ['admin', 'teacher'] },
     { name: "Analytics", path: "/analytics", icon: BarChart3, roles: ['admin', 'teacher'] },
-    { name: "AI Recommendations", path: "/recommendations", icon: Cpu, roles: ['admin', 'teacher', 'student'] },
+    { name: "AI Recommendations", path: "/recommendations", icon: Cpu, roles: ['admin', 'teacher'] },
     { name: "Reports", path: "/reports", icon: FileText, roles: ['admin', 'teacher'] },
     { name: "Smart Controls", path: "/controls", icon: Lightbulb, roles: ['admin'] },
     { name: "Settings", path: "/settings", icon: Settings, roles: ['admin'] },
