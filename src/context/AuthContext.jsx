@@ -6,13 +6,37 @@ const AuthContext = createContext({});
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
+  const [userRole, setUserRole] = useState('student'); // Default to student
   const [loading, setLoading] = useState(true);
+
+  // Helper to fetch role from DB
+  const fetchUserRole = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_points')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (data?.role) {
+        setUserRole(data.role);
+      } else {
+        // If row doesn't exist, create it with default student role
+        setUserRole('student');
+        console.log("No role found, defaulting to student");
+      }
+    } catch (err) {
+      console.error("Error fetching role:", err);
+      setUserRole('student');
+    }
+  };
 
   useEffect(() => {
     // Get active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) fetchUserRole(session.user.id);
       setLoading(false);
     });
 
@@ -22,6 +46,11 @@ export const AuthProvider = ({ children }) => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserRole(session.user.id);
+      } else {
+        setUserRole('student');
+      }
       setLoading(false);
     });
 
@@ -33,6 +62,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const response = await supabase.auth.signInWithPassword({ email, password });
     if (response.data?.user && !response.error) {
+       await fetchUserRole(response.data.user.id);
        // Log the sign in
        await supabase.from('api_logs').insert([{
            user_id: response.data.user.id,
@@ -52,6 +82,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     session,
     user,
+    role: userRole,
     loading,
     signOut,
     login,

@@ -23,7 +23,7 @@ gsap.registerPlugin(useGSAP);
 const Sidebar = ({ isOpen, onClose }) => {
   const containerRef = useRef(null);
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, role } = useAuth();
   
   const handleLogout = async () => {
     await signOut();
@@ -49,15 +49,15 @@ const Sidebar = ({ isOpen, onClose }) => {
   );
 
   const navItems = [
-    { name: "Dashboard", path: "/", icon: LayoutDashboard },
-    { name: "Campus Gamification & Impact", path: "/impact", icon: Globe },
-    { name: "Live Rooms", path: "/rooms", icon: Zap },
-    { name: "Analytics", path: "/analytics", icon: BarChart3 },
-    { name: "AI Recommendations", path: "/recommendations", icon: Cpu },
-    { name: "Reports", path: "/reports", icon: FileText },
-    { name: "Smart Controls", path: "/controls", icon: Lightbulb },
-    { name: "Settings", path: "/settings", icon: Settings },
-  ];
+    { name: "Dashboard", path: "/", icon: LayoutDashboard, roles: ['admin', 'teacher', 'student'] },
+    { name: "Campus Gamification & Impact", path: "/impact", icon: Globe, roles: ['admin', 'teacher', 'student'] },
+    { name: "Live Rooms", path: "/rooms", icon: Zap, roles: ['admin', 'teacher'] },
+    { name: "Analytics", path: "/analytics", icon: BarChart3, roles: ['admin', 'teacher'] },
+    { name: "AI Recommendations", path: "/recommendations", icon: Cpu, roles: ['admin', 'teacher', 'student'] },
+    { name: "Reports", path: "/reports", icon: FileText, roles: ['admin', 'teacher'] },
+    { name: "Smart Controls", path: "/controls", icon: Lightbulb, roles: ['admin'] },
+    { name: "Settings", path: "/settings", icon: Settings, roles: ['admin'] },
+  ].filter(item => item.roles.includes(role));
 
   return (
     <>
@@ -141,7 +141,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <p className="text-sm font-medium text-[rgb(var(--text-main))] truncate hover:text-emerald-400 transition-colors" title={user?.email}>
                 {user?.email || 'User'}
               </p>
-              <p className="text-xs text-[rgb(var(--text-muted))]">Authorized User</p>
+              <p className="text-xs text-[rgb(var(--text-muted))] capitalize">{role || 'Student'}</p>
             </div>
             <button
               onClick={handleLogout}

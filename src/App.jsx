@@ -41,14 +41,28 @@ function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/impact" element={<Impact />} />
                     <Route path="/games" element={<MiniGames />} />
-                    <Route path="/rooms" element={<Rooms />} />
-                    <Route path="/analytics" element={<Analytics />} />
-                    <Route path="/recommendations" element={<Recommendations />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route path="/controls" element={<Controls />} />
-                    <Route path="/settings" element={<Settings />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/recommendations" element={<Recommendations />} />
+
+                    {/* Teacher & Admin Routes */}
+                    <Route path="/rooms" element={
+                        <ProtectedRoute allowedRoles={['admin', 'teacher']}><Rooms /></ProtectedRoute>
+                    } />
+                    <Route path="/analytics" element={
+                        <ProtectedRoute allowedRoles={['admin', 'teacher']}><Analytics /></ProtectedRoute>
+                    } />
+                    <Route path="/reports" element={
+                        <ProtectedRoute allowedRoles={['admin', 'teacher']}><Reports /></ProtectedRoute>
+                    } />
+
+                    {/* Admin Only Routes */}
+                    <Route path="/controls" element={
+                        <ProtectedRoute allowedRoles={['admin']}><Controls /></ProtectedRoute>
+                    } />
+                    <Route path="/settings" element={
+                        <ProtectedRoute allowedRoles={['admin']}><Settings /></ProtectedRoute>
+                    } />
                   </Routes>
                 </Layout>
               </ProtectedRoute>

@@ -6,7 +6,7 @@ import { User, Mail, Shield, Calendar, Edit2, Key, Check, Award, TrendingUp } fr
 import { supabase } from '../lib/supabaseClient';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
@@ -145,8 +145,13 @@ const Profile = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center py-3 border-b border-[rgb(var(--border))]/50">
               <span className="text-[rgb(var(--text-muted))]">Role</span>
-              <span className="flex items-center gap-1 text-[rgb(var(--text-main))] font-medium bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded">
-                <Shield size={14} /> Administrator
+              <span className={clsx(
+                  "flex items-center gap-1 font-medium px-2 py-1 rounded capitalize",
+                  role === 'admin' ? "bg-purple-500/10 text-purple-400" :
+                  role === 'teacher' ? "bg-blue-500/10 text-blue-400" :
+                  "bg-emerald-500/10 text-emerald-400"
+              )}>
+                <Shield size={14} /> {role || 'Student'}
               </span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-[rgb(var(--border))]/50">
