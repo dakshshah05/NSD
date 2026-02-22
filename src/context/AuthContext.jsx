@@ -10,7 +10,17 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Helper to fetch role from DB
-  const fetchUserRole = async (userId) => {
+  const fetchUserRole = async (userId, email) => {
+    // HARDCODED OVERRIDES FOR ROLES
+    if (email === 'daksh.kumar@bcah.christuniversity.in') {
+      setUserRole('admin');
+      return;
+    }
+    
+    // Add additional overrides here if needed
+    // if (email === 'student@example.com') { setUserRole('student'); return; }
+    // if (email === 'teacher@example.com') { setUserRole('teacher'); return; }
+
     try {
       const { data, error } = await supabase
         .from('user_points')
@@ -36,7 +46,7 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) fetchUserRole(session.user.id);
+      if (session?.user) fetchUserRole(session.user.id, session.user.email);
       setLoading(false);
     });
 
@@ -47,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        fetchUserRole(session.user.id, session.user.email);
       } else {
         setUserRole('student');
       }
@@ -62,7 +72,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     const response = await supabase.auth.signInWithPassword({ email, password });
     if (response.data?.user && !response.error) {
-       await fetchUserRole(response.data.user.id);
+       await fetchUserRole(response.data.user.id, response.data.user.email);
        // Log the sign in
        await supabase.from('api_logs').insert([{
            user_id: response.data.user.id,
