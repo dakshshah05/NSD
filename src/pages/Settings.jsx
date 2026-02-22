@@ -50,9 +50,6 @@ const Settings = () => {
   const { settings, updateSetting } = useSettings();
   const { user, signOut, role } = useAuth();
 
-  // User Management State
-  const [authorizedUsers, setAuthorizedUsers] = useState([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
 
   // Modal States
   const [showLogs, setShowLogs] = useState(false);
@@ -85,41 +82,9 @@ const Settings = () => {
      }
   }, [showLogs, user]);
 
-  useEffect(() => {
-    if (role === 'admin') {
-      fetchAuthorizedUsers();
-    }
-  }, [role]);
-
-  const fetchAuthorizedUsers = async () => {
-    setLoadingUsers(true);
-    const { data } = await supabase
-      .from('user_roles')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (data) setAuthorizedUsers(data);
-    setLoadingUsers(false);
-  };
 
 
-  const handleRemoveUser = async (email) => {
-    if (!window.confirm(`Are you sure you want to PERMANENTLY delete account ${email}?`)) return;
 
-    try {
-      const { data, error } = await supabase.rpc('admin_delete_user', { target_email: email });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      alert(`Success! ${email} has been completely removed.`);
-      addNotification('Removed', `Access revoked for ${email}.`);
-      fetchAuthorizedUsers();
-    } catch (err) {
-      console.error("Delete User Error:", err);
-      alert(`Delete Failed: ${err.message}`);
-      addNotification('Error', 'Failed to remove user account correctly.');
-    }
-  };
 
   const handleSave = () => {
       addNotification('Success', 'System configuration saved successfully.');
@@ -146,48 +111,6 @@ const Settings = () => {
     <div className="max-w-4xl mx-auto animate-fade-in relative pb-12">
       <h2 className="text-2xl font-bold text-[rgb(var(--text-main))] mb-6">System Configuration</h2>
       
-      {/* Admin Only: User Management */}
-      {role === 'admin' && (
-        <SettingSection title="Authorized Access Management" icon={Key}>
-          <p className="text-sm text-[rgb(var(--text-muted))] mb-6">
-            View and manage users with special permissions (Teacher/Admin).
-          </p>
-
-
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-[rgb(var(--text-muted))] uppercase tracking-wider">Authorized Access List</h4>
-            {loadingUsers ? (
-              <div className="text-center py-4 text-slate-500 animate-pulse text-sm">Loading user list...</div>
-            ) : authorizedUsers.length === 0 ? (
-              <div className="text-center py-4 text-slate-500 italic text-sm border border-dashed border-[rgb(var(--border))] rounded-lg">No special authorizations found.</div>
-            ) : (
-              <div className="grid gap-2">
-                {authorizedUsers.map(u => (
-                  <div key={u.email} className="flex items-center justify-between p-3 bg-[rgb(var(--bg-input))] rounded-lg border border-[rgb(var(--border))] group">
-                    <div className="flex items-center gap-3">
-                      <div className={clsx(
-                        "w-2 h-2 rounded-full",
-                        u.role === 'admin' ? "bg-purple-500" : u.role === 'teacher' ? "bg-blue-500" : "bg-emerald-500"
-                      )} />
-                      <span className="text-sm font-medium text-white">{u.email}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-bold uppercase tracking-tighter ring-1 ring-slate-700">
-                        {u.role}
-                      </span>
-                    </div>
-                    <button 
-                      onClick={() => handleRemoveUser(u.email)}
-                      className="text-slate-500 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-all"
-                      title="Revoke Access"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </SettingSection>
-      )}
 
       <SettingSection title="Notifications" icon={Bell}>
          <ToggleRow 
