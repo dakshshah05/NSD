@@ -65,38 +65,40 @@ const Analytics = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Wastage Pie Chart */}
-        <div className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg lg:col-span-1 min-h-[400px]">
+        <div className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg lg:col-span-1 min-h-[400px] overflow-hidden">
           <h3 className="text-lg font-bold text-[rgb(var(--text-main))] mb-2 text-center lg:text-left">Energy Efficiency</h3>
           <p className="text-xs text-[rgb(var(--text-muted))] mb-6 text-center lg:text-left">Breakdown of power usage types</p>
-          <div className="h-72 relative">
-             <ResponsiveContainer width="100%" height="100%">
-               <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                  <Pie
-                    data={usageBreakdown}
-                    cx="50%"
-                    cy="45%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {usageBreakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                    ))}
-                  </Pie>
-                  <ReTooltip 
-                     formatter={(value) => [`${value}%`, 'Usage']}
-                     contentStyle={{ backgroundColor: 'rgb(var(--bg-card))', borderColor: 'rgb(var(--border))', borderRadius: '8px', color: 'rgb(var(--text-main))' }}
-                     itemStyle={{ color: 'rgb(var(--text-main))' }}
-                  />
-                  <Legend verticalAlign="bottom" height={40} wrapperStyle={{ paddingTop: '20px' }} />
-               </PieChart>
-             </ResponsiveContainer>
-             {/* Center Text */}
-             <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-                <span className="text-3xl font-bold text-[rgb(var(--text-main))]">{usageBreakdown[0].value}%</span>
-                <p className="text-xs text-[rgb(var(--text-muted))]">Efficient</p>
-             </div>
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="h-72 min-w-[320px] relative mx-auto">
+               <ResponsiveContainer width="100%" height="100%">
+                 <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                    <Pie
+                      data={usageBreakdown}
+                      cx="50%"
+                      cy="45%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {usageBreakdown.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                      ))}
+                    </Pie>
+                    <ReTooltip 
+                       formatter={(value) => [`${value}%`, 'Usage']}
+                       contentStyle={{ backgroundColor: 'rgb(var(--bg-card))', borderColor: 'rgb(var(--border))', borderRadius: '8px', color: 'rgb(var(--text-main))' }}
+                       itemStyle={{ color: 'rgb(var(--text-main))' }}
+                    />
+                    <Legend verticalAlign="bottom" height={40} wrapperStyle={{ paddingTop: '20px' }} />
+                 </PieChart>
+               </ResponsiveContainer>
+               {/* Center Text */}
+               <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                  <span className="text-3xl font-bold text-[rgb(var(--text-main))]">{usageBreakdown[0].value}%</span>
+                  <p className="text-xs text-[rgb(var(--text-muted))]">Efficient</p>
+               </div>
+            </div>
           </div>
         </div>
 
@@ -112,43 +114,45 @@ const Analytics = () => {
                </div>
            </div>
            
-           <div className="h-64 md:h-72 w-full">
-             <ResponsiveContainer width="100%" height="100%">
-               <ComposedChart 
-                    key={`composed-${selectedDate}`} 
-                    data={occupancyVsEnergy}
-                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                 <CartesianGrid stroke="rgb(var(--border))" strokeDasharray="3 3" vertical={false} />
-                 <XAxis 
-                    dataKey="time" 
-                    stroke="rgb(var(--text-muted))" 
-                    tick={{ fontSize: 10 }}
-                    interval={window.innerWidth < 768 ? 1 : 0}
-                 />
-                 <YAxis 
-                    yAxisId="left" 
-                    stroke="rgb(var(--text-muted))" 
-                    tick={{ fontSize: 10 }}
-                    allowDecimals={false}
-                 />
-                 <YAxis 
-                    yAxisId="right" 
-                    orientation="right" 
-                    stroke="#10b981" 
-                    tick={{ fontSize: 10 }}
-                    hide={window.innerWidth < 640}
-                 />
-                 <ReTooltip 
-                    formatter={(value) => [typeof value === 'number' ? value.toFixed(1) : value, '']}
-                    contentStyle={{ backgroundColor: 'rgb(var(--bg-card))', borderColor: 'rgb(var(--border))', color: 'rgb(var(--text-main))' }} 
-                 />
-                 <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                 <Bar yAxisId="left" dataKey="occupancy" barSize={window.innerWidth < 768 ? 20 : 30} fill="#3b82f6" radius={[4, 4, 0, 0]} name="People" />
-                 <Line yAxisId="right" type="monotone" dataKey="energy" stroke="#10b981" strokeWidth={3} dot={{r:3}} name="Energy" />
-               </ComposedChart>
-             </ResponsiveContainer>
-           </div>
+            <div className="overflow-x-auto scrollbar-hide pb-2">
+               <div className="h-64 md:h-72 min-w-[500px] w-full">
+                 <ResponsiveContainer width="100%" height="100%">
+                   <ComposedChart 
+                        key={`composed-${selectedDate}`} 
+                        data={occupancyVsEnergy}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                     <CartesianGrid stroke="rgb(var(--border))" strokeDasharray="3 3" vertical={false} />
+                     <XAxis 
+                        dataKey="time" 
+                        stroke="rgb(var(--text-muted))" 
+                        tick={{ fontSize: 10 }}
+                        interval={0}
+                     />
+                     <YAxis 
+                        yAxisId="left" 
+                        stroke="rgb(var(--text-muted))" 
+                        tick={{ fontSize: 10 }}
+                        allowDecimals={false}
+                     />
+                     <YAxis 
+                        yAxisId="right" 
+                        orientation="right" 
+                        stroke="#10b981" 
+                        tick={{ fontSize: 10 }}
+                        hide={window.innerWidth < 640}
+                     />
+                     <ReTooltip 
+                        formatter={(value) => [typeof value === 'number' ? value.toFixed(1) : value, '']}
+                        contentStyle={{ backgroundColor: 'rgb(var(--bg-card))', borderColor: 'rgb(var(--border))', color: 'rgb(var(--text-main))' }} 
+                     />
+                     <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                     <Bar yAxisId="left" dataKey="occupancy" barSize={20} fill="#3b82f6" radius={[4, 4, 0, 0]} name="People" />
+                     <Line yAxisId="right" type="monotone" dataKey="energy" stroke="#10b981" strokeWidth={3} dot={{r:3}} name="Energy" />
+                   </ComposedChart>
+                 </ResponsiveContainer>
+               </div>
+            </div>
         </div>
       </div>
 
