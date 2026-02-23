@@ -17,6 +17,7 @@ const Analytics = () => {
   const { selectedDate } = useDate();
   const { user, role } = useAuth();
   const { addNotification } = useNotifications();
+  const [dayData, setDayData] = useState(null);
   React.useEffect(() => {
       async function load() {
           setDayData(null);
