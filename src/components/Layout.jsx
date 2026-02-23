@@ -33,7 +33,7 @@ const Layout = ({ children }) => {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 h-full relative z-10">
+      <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 h-full relative z-10 pt-10 md:pt-0">
         <Header 
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
           title={getPageTitle(location.pathname)}

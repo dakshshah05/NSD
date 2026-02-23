@@ -73,7 +73,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       <aside
         ref={containerRef}
         className={twMerge(
-          "fixed top-0 left-0 h-full w-64 bg-[rgb(var(--bg-card))] border-r border-[rgb(var(--border))] z-[60] pt-[env(safe-area-inset-top)] transition-transform duration-300 ease-in-out md:translate-x-0",
+          "fixed top-0 left-0 h-full w-64 bg-[rgb(var(--bg-card))] border-r border-[rgb(var(--border))] z-[60] pt-10 md:pt-0 transition-transform duration-300 ease-in-out md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
