@@ -68,8 +68,8 @@ const Analytics = () => {
         <div className="bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg lg:col-span-1 min-h-[400px] overflow-hidden">
           <h3 className="text-lg font-bold text-[rgb(var(--text-main))] mb-2 text-center lg:text-left">Energy Efficiency</h3>
           <p className="text-xs text-[rgb(var(--text-muted))] mb-6 text-center lg:text-left">Breakdown of power usage types</p>
-          <div className="overflow-x-auto md:overflow-hidden scrollbar-hide">
-            <div className="h-80 min-w-[360px] md:min-w-0 relative mx-auto">
+          <div className="overflow-x-auto lg:overflow-hidden scrollbar-hide">
+            <div className="h-80 w-[400px] lg:w-full relative mx-auto">
                <ResponsiveContainer width="100%" height="100%">
                  <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                     <Pie
@@ -114,8 +114,8 @@ const Analytics = () => {
                </div>
            </div>
            
-            <div className="overflow-x-auto md:overflow-hidden scrollbar-hide pb-2">
-               <div className="h-64 md:h-72 min-w-[600px] md:min-w-0 w-full">
+            <div className="overflow-x-auto lg:overflow-hidden scrollbar-hide pb-2">
+               <div className="h-64 md:h-72 w-[700px] lg:w-full">
                  <ResponsiveContainer width="100%" height="100%">
                    <ComposedChart 
                         key={`composed-${selectedDate}`} 
@@ -177,8 +177,8 @@ const Analytics = () => {
             </div>
          </div>
          
-         <div className="overflow-x-auto md:overflow-hidden scrollbar-hide">
-            <div className="min-w-[800px] md:min-w-0">
+         <div className="overflow-x-auto lg:overflow-hidden scrollbar-hide">
+            <div className="w-[800px] lg:w-full">
                {/* Header Row */}
                <div className="flex mb-2">
                   <div className="w-20 shrink-0 text-sm font-bold text-[rgb(var(--text-muted))]">Room</div>
