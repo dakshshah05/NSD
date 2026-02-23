@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Leaf, Zap, AlertTriangle, Send, ChevronRight, Droplets, Wind, UserCheck, Search, Users, Award } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
-import { supabase } from '../lib/supabaseClient';
+import { fetchDailyStats, checkScheduleAnomalies } from '../data/historicalData';
 import { useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
+import { Clock, Power } from 'lucide-react';
 
 // --- 3D Components ---
 
@@ -104,7 +105,43 @@ const Impact = () => {
   const [reportLocation, setReportLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [topUsers, setTopUsers] = useState([]);
+  const [anomalies, setAnomalies] = useState([]);
+  const [loadingAnomalies, setLoadingAnomalies] = useState(true);
+  const [isReporting, setIsReporting] = useState({});
 
+  useEffect(() => {
+      async function loadAnomalies() {
+          setLoadingAnomalies(true);
+          const detected = await checkScheduleAnomalies();
+          setAnomalies(detected);
+          setLoadingAnomalies(false);
+      }
+      loadAnomalies();
+      const interval = setInterval(loadAnomalies, 60000);
+      return () => clearInterval(interval);
+  }, []);
+
+  const handleAnomalyReport = async (anomaly) => {
+      const anomalyId = anomaly.id;
+      setIsReporting(prev => ({ ...prev, [anomalyId]: true }));
+      try {
+          if (user?.id && role === 'student') {
+              await supabase.rpc('add_green_points', { user_id: user.id, points_to_add: 50 });
+          }
+          const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+          const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+          const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+          if (serviceId && templateId && publicKey) {
+              await emailjs.send(serviceId, templateId, { to_email: 'dakshshah215@gmail.com', subject: `ANOMALY REPORT: ${anomaly.room_name}`, message: `A student has reported a schedule anomaly.\n\nRoom: ${anomaly.room_name}\nType: ${anomaly.type}\nPower Draw: ${anomaly.power}W\nDetails: ${anomaly.details}\nReported by: ${user?.email || 'Anonymous Student'}`, date: new Date().toLocaleDateString(), filename: 'N/A' }, publicKey);
+          }
+          addNotification('Report Sent', `Successfully reported anomaly in ${anomaly.room_name}. +50 points awarded!`, 'success');
+          fetchLeaderboard();
+      } catch (error) {
+          addNotification('Error', 'Failed to send report.', 'error');
+      } finally {
+          setIsReporting(prev => ({ ...prev, [anomalyId]: false }));
+      }
+  };
   const fetchLeaderboard = async () => {
       const { data } = await supabase
           .from('user_points')
@@ -187,26 +224,27 @@ const Impact = () => {
          {/* Hero Overlay Content */}
          <div className="absolute inset-0 z-10 bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-transparent pointer-events-none" />
          
-         <div className="relative z-20 h-full flex flex-col justify-center p-8 md:p-12 w-full md:w-2/3 lg:w-1/2">
+         <div className="relative z-20 h-full flex flex-col justify-center p-6 md:p-12 w-full md:w-2/3 lg:w-1/2 pointer-events-none">
              <motion.div
                  initial={{ opacity: 0, y: 30 }}
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ duration: 0.8, ease: "easeOut" }}
+                 className="pointer-events-auto"
              >
-                 <div className="inline-flex items-center space-x-2 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full backdrop-blur-md mb-6">
+                 <div className="inline-flex items-center space-x-2 bg-emerald-500/20 border border-emerald-400/30 px-3 py-1 rounded-full backdrop-blur-md mb-4 md:mb-6">
                      <span className="relative flex h-3 w-3">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                      </span>
-                     <span className="text-emerald-300 text-sm font-semibold tracking-wider uppercase">Live Impact</span>
+                     <span className="text-emerald-300 text-[10px] md:text-sm font-semibold tracking-wider uppercase">Live Impact</span>
                  </div>
                  
-                 <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight tracking-tight">
+                 <h1 className="text-3xl md:text-6xl font-black text-white mb-3 md:mb-4 leading-tight tracking-tight">
                      Our Campus.<br />
                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Our Future.</span>
                  </h1>
-                 <p className="text-slate-300 text-lg md:text-xl max-w-xl font-light leading-relaxed">
-                     Join the college-wide initiative to reduce carbon emissions. Every watt saved contributes to a greener, smarter institution.
+                 <p className="text-slate-300 text-sm md:text-xl max-w-xl font-light leading-relaxed">
+                     Join the college-wide initiative to reduce carbon emissions. Every watt saved contributes to a greener institution.
                  </p>
              </motion.div>
          </div>
@@ -350,6 +388,59 @@ const Impact = () => {
                      </motion.div>
                  ))}
              </div>
+          </div>
+
+          {/* --- SCHEDULE ANOMALY DETECTION (Moved from Analytics) --- */}
+          <div className="bg-gradient-to-br from-slate-900 to-red-950/20 border border-[rgb(var(--border))] rounded-3xl p-6 md:p-8 relative overflow-hidden lg:col-span-3">
+             <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                 <AlertTriangle size={120} />
+             </div>
+             <div className="relative z-10 flex items-center gap-4 mb-8">
+                 <div className="p-3 bg-red-500/20 rounded-xl text-red-500 flex-shrink-0">
+                    <AlertTriangle size={24} />
+                 </div>
+                 <div>
+                     <h3 className="text-xl font-bold text-white">Live Schedule Anomalies</h3>
+                     <p className="text-xs md:text-sm text-slate-400">Comparing active room power against the official daily timetable.</p>
+                 </div>
+             </div>
+
+             {loadingAnomalies ? (
+                 <div className="py-8 text-center text-slate-400 animate-pulse">Scanning campus grid...</div>
+             ) : anomalies.length === 0 ? (
+                 <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 flex items-center justify-center text-emerald-400 gap-3">
+                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                     <span className="text-sm font-medium">Power consumption aligns with current timetable.</span>
+                 </div>
+             ) : (
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                     {anomalies.map((anomaly, i) => (
+                         <motion.div 
+                            key={anomaly.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="bg-[rgb(var(--bg-input))] border border-red-500/30 rounded-xl p-5 hover:border-red-500/60 transition-colors relative"
+                         >
+                             <div className="flex justify-between items-start mb-3">
+                                 <h4 className="font-bold text-white text-base truncate pr-2">{anomaly.room_name}</h4>
+                                 <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20 shrink-0">{anomaly.type}</span>
+                             </div>
+                             <div className="space-y-1 text-xs mb-4">
+                                 <div className="flex items-center text-slate-300 gap-2"><Power size={12} className="text-amber-400" /> {anomaly.power}W Power Draw</div>
+                                 <div className="flex items-center text-slate-400 gap-2"><Clock size={12} className="text-blue-400" /> {anomaly.details}</div>
+                             </div>
+                             <button 
+                                onClick={() => handleAnomalyReport(anomaly)}
+                                disabled={isReporting[anomaly.id]}
+                                className="w-full py-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-sm font-bold transition-all border border-red-500/20 flex items-center justify-center gap-2"
+                             >
+                                 <Send size={12} /> {isReporting[anomaly.id] ? 'Reporting...' : 'Report Now'}
+                             </button>
+                          </motion.div>
+                     ))}
+                 </div>
+             )}
           </div>
 
           {/* --- CROWDSOURCED REPORTING PORTAL --- */}

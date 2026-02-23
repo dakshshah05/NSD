@@ -48,15 +48,18 @@ const Header = ({ onMenuClick, title }) => {
       <div className="flex items-center space-x-3 md:space-x-6">
         
         {/* Date Picker */}
-        <div className="flex items-center bg-[rgb(var(--bg-input))] rounded-full px-3 py-1.5 border border-[rgb(var(--border))]">
-            <Calendar size={14} className="text-emerald-400 mr-2" />
+        <div className="flex items-center bg-[rgb(var(--bg-input))] rounded-full p-1.5 md:px-3 border border-[rgb(var(--border))] group/calendar transition-all hover:bg-emerald-500/5">
+            <Calendar size={14} className="text-emerald-400 md:mr-2" />
             <input 
                 type="date" 
                 value={selectedDate}
                 max={today}
                 onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
-                className="bg-transparent text-sm text-[rgb(var(--text-main))] focus:outline-none w-28 md:w-auto"
+                className="bg-transparent text-sm text-[rgb(var(--text-main))] focus:outline-none w-0 md:w-auto opacity-0 md:opacity-100 absolute md:relative left-0 top-0 cursor-pointer md:cursor-text"
             />
+            <span className="hidden md:inline text-xs text-[rgb(var(--text-muted))] group-hover/calendar:text-[rgb(var(--text-main))] transition-colors">
+                {new Date(selectedDate).toLocaleDateString()}
+            </span>
         </div>
 
         {/* Search Bar */}
