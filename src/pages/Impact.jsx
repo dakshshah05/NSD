@@ -305,10 +305,10 @@ const Impact = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 + (i * 0.1) }}
                         whileHover={{ scale: 1.02, translateX: 5 }}
-                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
+                        className={`flex items-center justify-between p-4 rounded-2xl border backdrop-blur-md transition-all cursor-pointer ${
                             i === 0 
                                 ? 'bg-gradient-to-r from-amber-500/10 to-transparent border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' 
-                                : 'bg-[rgb(var(--bg-input))] border-transparent hover:border-[rgb(var(--border))]'
+                                : 'bg-[rgb(var(--glass-bg))]/40 border-[rgb(var(--glass-border))]/10 hover:border-[rgb(var(--border))]'
                         }`}
                      >
                          <div className="flex items-center space-x-4">
@@ -363,10 +363,10 @@ const Impact = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 + (i * 0.1) }}
                         whileHover={{ scale: 1.02, translateX: 5 }}
-                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
+                        className={`flex items-center justify-between p-4 rounded-2xl border backdrop-blur-md transition-all cursor-pointer ${
                             i === 0 
                                 ? 'bg-gradient-to-r from-emerald-500/10 to-transparent border-emerald-500/30' 
-                                : 'bg-[rgb(var(--bg-input))] border-transparent hover:border-[rgb(var(--border))]'
+                                : 'bg-[rgb(var(--glass-bg))]/40 border-[rgb(var(--glass-border))]/10 hover:border-[rgb(var(--border))]'
                         }`}
                      >
                          <div className="flex items-center space-x-4">
@@ -420,7 +420,7 @@ const Impact = () => {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-[rgb(var(--bg-input))] border border-red-500/30 rounded-xl p-5 hover:border-red-500/60 transition-colors relative"
+                            className="bg-[rgb(var(--glass-bg))]/40 backdrop-blur-md border border-red-500/20 rounded-xl p-5 hover:border-red-500/50 transition-colors relative"
                          >
                              <div className="flex justify-between items-start mb-3">
                                  <h4 className="font-bold text-[rgb(var(--text-main))] text-base truncate pr-2">{anomaly.room_name}</h4>
