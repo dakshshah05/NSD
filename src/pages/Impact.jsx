@@ -207,7 +207,7 @@ const Impact = () => {
     <div className="space-y-8 animate-fade-in relative z-10 pb-12 overflow-x-hidden">
       
       {/* --- HERO SECTION WITH 3D --- */}
-      <div className="relative rounded-3xl overflow-hidden bg-slate-900 border border-emerald-500/20 shadow-2xl shadow-emerald-500/10 h-[400px]">
+      <div className="relative rounded-3xl overflow-hidden bg-[rgb(var(--bg-card))] border border-emerald-500/20 shadow-2xl shadow-emerald-500/10 h-[400px]">
          {/* 3D Canvas Background */}
          <div className="absolute inset-0 z-0">
              <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
@@ -222,7 +222,7 @@ const Impact = () => {
          </div>
 
          {/* Hero Overlay Content */}
-         <div className="absolute inset-0 z-10 bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-transparent pointer-events-none" />
+         <div className="absolute inset-0 z-10 bg-gradient-to-r from-[rgb(var(--bg-card))]/90 via-[rgb(var(--bg-card))]/60 to-transparent pointer-events-none" />
          
          <div className="relative z-20 h-full flex flex-col justify-center p-6 md:p-12 w-full md:w-2/3 lg:w-1/2 pointer-events-none">
              <motion.div
@@ -236,14 +236,14 @@ const Impact = () => {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                      </span>
-                     <span className="text-emerald-300 text-[10px] md:text-sm font-semibold tracking-wider uppercase">Live Impact</span>
+                     <span className="text-emerald-500 text-[10px] md:text-sm font-semibold tracking-wider uppercase">Live Impact</span>
                  </div>
                  
-                 <h1 className="text-3xl md:text-6xl font-black text-white mb-3 md:mb-4 leading-tight tracking-tight">
+                 <h1 className="text-3xl md:text-6xl font-black text-[rgb(var(--text-main))] mb-3 md:mb-4 leading-tight tracking-tight">
                      Our Campus.<br />
                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Our Future.</span>
                  </h1>
-                 <p className="text-slate-300 text-sm md:text-xl max-w-xl font-light leading-relaxed">
+                 <p className="text-[rgb(var(--text-muted))] text-sm md:text-xl max-w-xl font-light leading-relaxed">
                      Join the college-wide initiative to reduce carbon emissions. Every watt saved contributes to a greener institution.
                  </p>
              </motion.div>
@@ -289,10 +289,10 @@ const Impact = () => {
              
              <div className="flex justify-between items-center mb-8">
                  <div>
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-[rgb(var(--text-main))] flex items-center gap-3">
                         <Trophy className="text-amber-400" /> Block Leaderboard
                     </h2>
-                    <p className="text-sm text-slate-400 mt-1">Which building is saving the most energy?</p>
+                    <p className="text-sm text-[rgb(var(--text-muted))] mt-1">Which building is saving the most energy?</p>
                  </div>
                  
              </div>
@@ -344,10 +344,10 @@ const Impact = () => {
              
              <div className="flex justify-between items-center mb-8">
                  <div>
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-[rgb(var(--text-main))] flex items-center gap-3">
                         <Award className="text-emerald-400" /> Top Eco-Warriors
                     </h2>
-                    <p className="text-sm text-slate-400 mt-1">Students leading by example</p>
+                    <p className="text-sm text-[rgb(var(--text-muted))] mt-1">Students leading by example</p>
                  </div>
              </div>
 
@@ -391,17 +391,17 @@ const Impact = () => {
           </div>
 
           {/* --- SCHEDULE ANOMALY DETECTION (Moved from Analytics) --- */}
-          <div className="bg-gradient-to-br from-slate-900 to-red-950/20 border border-[rgb(var(--border))] rounded-3xl p-6 md:p-8 relative overflow-hidden lg:col-span-3">
+          <div className="bg-gradient-to-br from-[rgb(var(--bg-card))] to-red-500/10 border border-[rgb(var(--border))] rounded-3xl p-6 md:p-8 relative overflow-hidden lg:col-span-3">
              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                 <AlertTriangle size={120} />
+                 <AlertTriangle size={120} className="text-[rgb(var(--text-main))]" />
              </div>
              <div className="relative z-10 flex items-center gap-4 mb-8">
                  <div className="p-3 bg-red-500/20 rounded-xl text-red-500 flex-shrink-0">
                     <AlertTriangle size={24} />
                  </div>
                  <div>
-                     <h3 className="text-xl font-bold text-white">Live Schedule Anomalies</h3>
-                     <p className="text-xs md:text-sm text-slate-400">Comparing active room power against the official daily timetable.</p>
+                     <h3 className="text-xl font-bold text-[rgb(var(--text-main))]">Live Schedule Anomalies</h3>
+                     <p className="text-xs md:text-sm text-[rgb(var(--text-muted))]">Comparing active room power against the official daily timetable.</p>
                  </div>
              </div>
 
@@ -423,12 +423,12 @@ const Impact = () => {
                             className="bg-[rgb(var(--bg-input))] border border-red-500/30 rounded-xl p-5 hover:border-red-500/60 transition-colors relative"
                          >
                              <div className="flex justify-between items-start mb-3">
-                                 <h4 className="font-bold text-white text-base truncate pr-2">{anomaly.room_name}</h4>
+                                 <h4 className="font-bold text-[rgb(var(--text-main))] text-base truncate pr-2">{anomaly.room_name}</h4>
                                  <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20 shrink-0">{anomaly.type}</span>
                              </div>
                              <div className="space-y-1 text-xs mb-4">
-                                 <div className="flex items-center text-slate-300 gap-2"><Power size={12} className="text-amber-400" /> {anomaly.power}W Power Draw</div>
-                                 <div className="flex items-center text-slate-400 gap-2"><Clock size={12} className="text-blue-400" /> {anomaly.details}</div>
+                                 <div className="flex items-center text-[rgb(var(--text-sec))] gap-2"><Power size={12} className="text-amber-400" /> {anomaly.power}W Power Draw</div>
+                                 <div className="flex items-center text-[rgb(var(--text-muted))] gap-2"><Clock size={12} className="text-blue-400" /> {anomaly.details}</div>
                              </div>
                              <button 
                                 onClick={() => handleAnomalyReport(anomaly)}
@@ -444,15 +444,15 @@ const Impact = () => {
           </div>
 
           {/* --- CROWDSOURCED REPORTING PORTAL --- */}
-          <div className="bg-gradient-to-br from-slate-900 via-[rgb(var(--bg-card))] to-slate-900 border border-[rgb(var(--border))] rounded-3xl p-6 md:p-8 relative overflow-hidden group">
+          <div className="bg-gradient-to-br from-[rgb(var(--bg-main))] via-[rgb(var(--bg-card))] to-[rgb(var(--bg-main))] border border-[rgb(var(--border))] rounded-3xl p-6 md:p-8 relative overflow-hidden group">
               
               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
               
               <div className="relative z-10">
-                 <h2 className="text-2xl font-bold text-white flex items-center gap-3 mb-2">
+                 <h2 className="text-2xl font-bold text-[rgb(var(--text-main))] flex items-center gap-3 mb-2">
                      <Users className="text-blue-400" /> Campus Watch
                  </h2>
-                 <p className="text-sm text-slate-400 mb-8 border-b border-white/5 pb-6">
+                 <p className="text-sm text-[rgb(var(--text-muted))] mb-8 border-b border-[rgb(var(--border))]/50 pb-6">
                      Notice lights left on in an empty classroom? A running AC in the lab? Report it anonymously and earn Green Points. 
                  </p>
 
