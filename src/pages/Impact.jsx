@@ -12,7 +12,7 @@ import { Clock, Power } from 'lucide-react';
 
 // --- 3D Components ---
 
-const RealEarthGame = () => {
+const RealEarthGame = ({ theme }) => {
   const earthTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
   const sphereRef = useRef();
   const navigate = useNavigate();
@@ -37,6 +37,7 @@ const RealEarthGame = () => {
             map={earthTexture}
             roughness={0.6}
             metalness={0.1}
+            color={theme === 'light' ? '#888888' : '#ffffff'}
           />
         </Sphere>
       </Float>
@@ -211,12 +212,12 @@ const Impact = () => {
          {/* 3D Canvas Background */}
          <div className="absolute inset-0 z-0">
              <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-                 <ambientLight intensity={0.8} />
-                 <directionalLight position={[10, 10, 5]} intensity={2} color="#ffffff" />
+                 <ambientLight intensity={theme === 'light' ? 0.3 : 0.8} />
+                 <directionalLight position={[10, 10, 5]} intensity={theme === 'light' ? 1 : 2} color="#ffffff" />
                  <pointLight position={[-10, -10, -5]} intensity={0.5} color="#0284c7" />
                  <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
                  <React.Suspense fallback={null}>
-                     <RealEarthGame />
+                     <RealEarthGame theme={theme} />
                  </React.Suspense>
              </Canvas>
          </div>
