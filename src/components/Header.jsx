@@ -79,22 +79,21 @@ const Header = ({ onMenuClick, title }) => {
         >
           <Calendar size={14} className="text-emerald-400 md:mr-2 shrink-0 pointer-events-none" />
           <span className="text-xs text-[rgb(var(--text-main))] font-medium group-hover/calendar:text-emerald-400 transition-colors pointer-events-none">
-            {new Date(selectedDate)
-              .toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })
-              .replace(/\//g, "-")}
+            {selectedDate ? selectedDate.split('-').reverse().join('-') : '--'}
           </span>
           <input
             ref={dateInputRef}
             type="date"
             value={selectedDate}
             max={today}
-            onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val) {
+                console.log("Date selected:", val);
+                setSelectedDate(val);
+              }
+            }}
             className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-            onClick={(e) => e.stopPropagation()}
           />
         </div>
 
