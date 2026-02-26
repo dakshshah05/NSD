@@ -4,6 +4,7 @@ import { OrbitControls, Sphere, Float, Stars, Text, useTexture } from '@react-th
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Leaf, Zap, AlertTriangle, Send, ChevronRight, Droplets, Wind, UserCheck, Search, Users, Award } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNotifications } from '../context/NotificationContext';
 import { fetchDailyStats, checkScheduleAnomalies } from '../data/historicalData';
 import { useNavigate } from 'react-router-dom';
@@ -102,6 +103,7 @@ const HOSTEL_RANKINGS = [
 const Impact = () => {
   const { addNotification } = useNotifications();
   const { user, role } = useAuth();
+  const { theme } = useTheme();
   const [reportType, setReportType] = useState('electricity');
   const [reportLocation, setReportLocation] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
