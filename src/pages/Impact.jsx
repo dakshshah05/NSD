@@ -38,7 +38,7 @@ const RealEarthGame = ({ theme }) => {
             map={earthTexture}
             roughness={0.6}
             metalness={0.1}
-            color={theme === 'light' ? '#888888' : '#ffffff'}
+            color="#ffffff"
           />
         </Sphere>
       </Float>
@@ -214,8 +214,8 @@ const Impact = () => {
          {/* 3D Canvas Background */}
          <div className="absolute inset-0 z-0">
              <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-                 <ambientLight intensity={theme === 'light' ? 0.3 : 0.8} />
-                 <directionalLight position={[10, 10, 5]} intensity={theme === 'light' ? 1 : 2} color="#ffffff" />
+                 <ambientLight intensity={theme === 'light' ? 0.6 : 0.8} />
+                 <directionalLight position={[10, 10, 5]} intensity={theme === 'light' ? 1.5 : 2} color="#ffffff" />
                  <pointLight position={[-10, -10, -5]} intensity={0.5} color="#0284c7" />
                  <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
                  <React.Suspense fallback={null}>
@@ -225,7 +225,7 @@ const Impact = () => {
          </div>
 
          {/* Hero Overlay Content */}
-         <div className="absolute inset-0 z-10 bg-gradient-to-r from-[rgb(var(--bg-card))]/90 via-[rgb(var(--bg-card))]/60 to-transparent pointer-events-none" />
+         <div className="absolute inset-0 z-10 bg-gradient-to-r from-[rgb(var(--bg-card))]/95 from-10% via-[rgb(var(--bg-card))]/20 via-50% to-transparent pointer-events-none" />
          
          <div className="relative z-20 h-full flex flex-col justify-center p-6 md:p-12 w-full md:w-2/3 lg:w-1/2 pointer-events-none">
              <motion.div
