@@ -23,7 +23,23 @@ const Header = ({ onMenuClick, title }) => {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
   const [showNotifs, setShowNotifs] = useState(false);
+  const dateInputRef = useRef(null);
   const notifRef = useRef(null);
+  
+  const handleDateClick = () => {
+    try {
+      if (dateInputRef.current) {
+        if ('showPicker' in HTMLInputElement.prototype) {
+          dateInputRef.current.showPicker();
+        } else {
+          dateInputRef.current.click();
+        }
+      }
+    } catch (err) {
+      console.warn("showPicker error:", err);
+      dateInputRef.current?.click();
+    }
+  };
 
   const handleSearch = (e) => {
     if (e.key === "Enter" && searchInput.trim()) {
@@ -57,9 +73,12 @@ const Header = ({ onMenuClick, title }) => {
 
       <div className="flex items-center space-x-3 md:space-x-6">
         {/* Date Picker */}
-        <div className="relative flex items-center bg-[rgb(var(--bg-input))] rounded-full p-2 md:px-3 border border-[rgb(var(--border))] group/calendar transition-all hover:bg-emerald-500/5 cursor-pointer overflow-hidden">
-          <Calendar size={14} className="text-emerald-400 md:mr-2 shrink-0" />
-          <span className="text-xs text-[rgb(var(--text-main))] font-medium group-hover/calendar:text-emerald-400 transition-colors">
+        <div 
+          onClick={handleDateClick}
+          className="relative flex items-center bg-[rgb(var(--bg-input))] rounded-full p-2 md:px-3 border border-[rgb(var(--border))] group/calendar transition-all hover:bg-emerald-500/5 cursor-pointer overflow-hidden"
+        >
+          <Calendar size={14} className="text-emerald-400 md:mr-2 shrink-0 pointer-events-none" />
+          <span className="text-xs text-[rgb(var(--text-main))] font-medium group-hover/calendar:text-emerald-400 transition-colors pointer-events-none">
             {new Date(selectedDate)
               .toLocaleDateString("en-GB", {
                 day: "2-digit",
@@ -69,11 +88,13 @@ const Header = ({ onMenuClick, title }) => {
               .replace(/\//g, "-")}
           </span>
           <input
+            ref={dateInputRef}
             type="date"
             value={selectedDate}
             max={today}
             onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
             className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
 
