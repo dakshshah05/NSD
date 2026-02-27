@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, Loader2 } from 'lucide-react';
 import { getMockData } from '../data/mockData';
-
+import { GoogleGenerativeAI } from '@google/generative-ai';
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { text: "Hi! I'm your Energy AI assistant. Ask me about block consumption, savings, or hostel usage.", sender: 'bot' }
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -18,50 +19,50 @@ const Chatbot = () => {
     scrollToBottom();
   }, [messages, isOpen]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMsg = input.trim();
     setMessages(prev => [...prev, { text: userMsg, sender: 'user' }]);
     setInput('');
-    
-    // Simulate thinking delay
-    setTimeout(() => {
-      const response = generateResponse(userMsg);
-      setMessages(prev => [...prev, { text: response, sender: 'bot' }]);
-    }, 600);
-  };
+    setIsLoading(true);
 
-  const generateResponse = (query) => {
-    const q = query.toLowerCase();
-    const todayData = getMockData(new Date().toISOString().split('T')[0]);
-    
-    if (q.includes('most energy') || q.includes('highest')) {
-       // Ensure there's data and it has blocks before applying reduce
-       if (todayData && todayData.blocks && todayData.blocks.length > 0) {
-         const highestBlock = todayData.blocks.reduce((max, b) => max.consumption > b.consumption ? max : b);
-         return `Currently, it looks like ${highestBlock.block} is using the most energy with ${highestBlock.consumption} kWh based on today's simulated data.`;
-       }
-       return "I couldn't fetch today's data directly.";
-    }
-    
-    if (q.includes('saved today') || q.includes('savings')) {
-        return "You've saved approximately 12.4% energy today compared to the historical baseline for this scenario!";
-    }
-    
-    if (q.includes('hostel') && q.includes('consumption')) {
-        if (todayData && todayData.blocks) {
-            const boys = todayData.blocks.find(b => b.block === 'Boys Hostel')?.consumption || 0;
-            const girls = todayData.blocks.find(b => b.block === 'Girls Hostel')?.consumption || 0;
-            return `The Boys Hostel has consumed ${boys} kWh, and the Girls Hostel has consumed ${girls} kWh today.`;
-        }
-    }
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      
+      if (!apiKey) {
+        setMessages(prev => [...prev, { 
+          text: "I need a Gemini API key to answer your questions! Please add `VITE_GEMINI_API_KEY=your_key_here` to your `.env` file.", 
+          sender: 'bot' 
+        }]);
+        setIsLoading(false);
+        return;
+      }
 
-    if (q.includes('hello') || q.includes('hi')) {
-       return "Hello! How can I help you optimize your energy usage today?";
-    }
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    return "I'm still learning! Try asking: 'Which block used most energy?', 'How much energy was saved today?', or 'Show me hostel consumption.'";
+      // Add system context using today's data so it knows about energy
+      const todayData = getMockData(new Date().toISOString().split('T')[0]);
+      const systemContext = `You are a helpful AI Energy Assistant for a college campus dashboard. 
+Today's simulated data context: ${JSON.stringify(todayData)}. 
+Answer the user's questions about energy consumption, savings, and general campus block details concisely and accurately. Use Markdown for formatting if helpful.`;
+
+      const prompt = `${systemContext}\n\nUser Question: ${userMsg}`;
+      
+      const result = await model.generateContent(prompt);
+      const responseText = result.response.text();
+
+      setMessages(prev => [...prev, { text: responseText, sender: 'bot' }]);
+    } catch (error) {
+      console.error("Chatbot API Error:", error);
+      setMessages(prev => [...prev, { 
+        text: "Sorry, I encountered an error connecting to the AI service. Please check your API key and network connection.", 
+        sender: 'bot' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -116,10 +117,10 @@ const Chatbot = () => {
             />
             <button 
               onClick={handleSend}
-              disabled={!input.trim()}
+              disabled={!input.trim() || isLoading}
               className="bg-indigo-600 text-white p-2 rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 shadow-sm flex items-center justify-center shrink-0"
             >
-               <Send size={18} />
+               {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             </button>
           </div>
         </div>
