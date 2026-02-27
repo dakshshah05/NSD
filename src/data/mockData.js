@@ -64,15 +64,30 @@ const generateDayData = (dateKey) => {
       { type: 'HIGH_LOAD', base: 22000, label: 'Heatwave / High Demand' },
       { type: 'WEEKEND', base: 6000, label: 'Weekend / Holiday' },
       { type: 'LEAKAGE', base: 15000, label: 'Equipment Malfunction' },
-      { type: 'EVENT', base: 18000, label: 'Campus Festival' }
+      { type: 'EVENT', base: 18000, label: 'Campus Festival' },
+      { type: 'EXAM', base: 16000, label: 'Exam Season' } // Added Exam Season
     ];
 
     let scenario = scenarios[0];
     const rand = Math.random(); 
-    // Pseudo-random based on date to keep it consistent-ish if reused (not strictly seeded here but works for flow)
-    if (date.getDay() === 0 || date.getDay() === 6) scenario = scenarios[2]; 
-    else if (rand > 0.85) scenario = scenarios[1]; 
-    else if (rand > 0.7) scenario = scenarios[3]; 
+    
+    // Smart Calendar Check
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const month = date.getMonth(); // 0 is Jan, 11 is Dec
+    const isExamSeason = month === 4 || month === 11; // May and Dec exams
+    const isHoliday = month === 6; // July Summer Break
+    
+    if (isHoliday) {
+        scenario = scenarios[2]; // Holiday = Weekend profile
+    } else if (isWeekend) {
+        scenario = scenarios[2];
+    } else if (isExamSeason && rand > 0.3) {
+        scenario = scenarios[5]; // High chance of EXAM profile during exam months
+    } else if (rand > 0.85) {
+        scenario = scenarios[1]; 
+    } else if (rand > 0.7) {
+        scenario = scenarios[3]; 
+    }
     
     const dailyConsumption = Math.floor(scenario.base + Math.random() * 2000);
     
@@ -82,6 +97,9 @@ const generateDayData = (dateKey) => {
         trendCurve = [60, 50, 80, 120, 110, 150, 180];
     } else if (scenario.type === 'HIGH_LOAD') {
         trendCurve = [200, 180, 800, 1600, 1500, 1100, 600];
+    } else if (scenario.type === 'EXAM') {
+        // High night usage, lower morning usage relative to normal
+        trendCurve = [250, 200, 300, 1000, 950, 800, 500];
     } else {
         trendCurve = [120, 80, 450, 980, 850, 600, 300];
     }
@@ -108,6 +126,7 @@ const generateDayData = (dateKey) => {
     if (scenario.type === 'HIGH_LOAD') baseBreakdown = [50, 15, 35];
     else if (scenario.type === 'WEEKEND') baseBreakdown = [30, 60, 10];
     else if (scenario.type === 'LEAKAGE') baseBreakdown = [60, 10, 30];
+    else if (scenario.type === 'EXAM') baseBreakdown = [75, 15, 10];
 
     // Add variance
     const variance1 = Math.floor(Math.random() * 6) - 3;
@@ -136,14 +155,16 @@ const generateDayData = (dateKey) => {
     return {
         date: dateKey,
         scenario: scenario.type,
+        calendarEvent: isHoliday ? 'Summer Break' : (isExamSeason ? 'Exam Season' : (isWeekend ? 'Weekend' : 'Regular Term')),
         totalConsumption: dailyConsumption,
+        adjustedTarget: isExamSeason ? scenario.base * 1.1 : (isWeekend ? scenario.base * 0.8 : scenario.base), // Smart Limits
         trends: trends,
         blocks: [ 
-            { block: 'Block A', consumption: Math.floor(dailyConsumption * (scenario.type === 'WEEKEND' ? 0.1 : 0.3)) },
+            { block: 'Block A', consumption: Math.floor(dailyConsumption * (scenario.type === 'WEEKEND' ? 0.1 : (scenario.type === 'EXAM' ? 0.35 : 0.3))) },
             { block: 'Block B', consumption: Math.floor(dailyConsumption * 0.2) },
             { block: 'Block C', consumption: Math.floor(dailyConsumption * 0.15) },
-            { block: 'Boys Hostel', consumption: Math.floor(dailyConsumption * (scenario.type === 'WEEKEND' ? 0.4 : 0.2)) },
-            { block: 'Girls Hostel', consumption: Math.floor(dailyConsumption * (scenario.type === 'WEEKEND' ? 0.35 : 0.15)) },
+            { block: 'Boys Hostel', consumption: Math.floor(dailyConsumption * (scenario.type === 'WEEKEND' ? 0.4 : (scenario.type === 'EXAM' ? 0.25 : 0.2))) },
+            { block: 'Girls Hostel', consumption: Math.floor(dailyConsumption * (scenario.type === 'WEEKEND' ? 0.35 : (scenario.type === 'EXAM' ? 0.2 : 0.15))) },
         ],
         wasteEvents: wasteEvents,
         rooms: generateRooms(scenario.type),

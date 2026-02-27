@@ -3,11 +3,12 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   BarChart, Bar, Cell 
 } from 'recharts';
-import { Zap, Home, TrendingDown, AlertTriangle } from 'lucide-react';
+import { Zap, Home, TrendingDown, AlertTriangle, Lightbulb, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import StatCard from '../components/StatCard';
-import { getMockData } from '../data/mockData';
+import { getMockData, recommendationsData } from '../data/mockData';
 import { fetchDailyStats } from '../data/historicalData';
 import { useDate } from '../context/DateContext';
 
@@ -216,6 +217,47 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
+
+      {/* Recommendations Section */}
+      <div className="gsap-chart bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-2xl p-6 shadow-lg">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-yellow-500/20 rounded-lg text-yellow-500">
+              <Lightbulb size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-[rgb(var(--text-main))]">Smart Recommendations</h3>
+              <p className="text-sm text-[rgb(var(--text-muted))]">AI-generated actionable insights for energy optimization</p>
+            </div>
+          </div>
+          <Link to="/recommendations" className="hidden md:flex items-center text-sm font-medium text-indigo-500 hover:text-indigo-400 transition-colors">
+            View All <ArrowRight size={16} className="ml-1" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {recommendationsData.slice(0, 2).map((rec, index) => (
+            <div key={index} className="bg-[rgb(var(--bg-input))] rounded-xl p-4 border border-[rgb(var(--border))] hover:border-indigo-500/50 transition-colors group">
+              <div className="flex justify-between items-start mb-2">
+                <span className={`text-xs font-bold px-2 py-1 rounded-full ${rec.type === 'critical' ? 'bg-red-500/20 text-red-500' : 'bg-orange-500/20 text-orange-500'}`}>
+                  {rec.priority} Priority
+                </span>
+                <span className="text-sm font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+                  Save {rec.savings}
+                </span>
+              </div>
+              <h4 className="text-base font-bold text-[rgb(var(--text-main))] mb-1">{rec.recommendation}</h4>
+              <p className="text-sm text-[rgb(var(--text-muted))] mb-3">{rec.insight} in {rec.room} ({rec.block})</p>
+              <Link to="/recommendations" className="text-xs font-medium text-indigo-500 hover:text-indigo-400 flex items-center group-hover:underline">
+                Take Action <ArrowRight size={14} className="ml-1" />
+              </Link>
+            </div>
+          ))}
+        </div>
+        <Link to="/recommendations" className="md:hidden mt-4 flex items-center justify-center w-full py-2 bg-[rgb(var(--bg-input))] rounded-lg text-sm font-medium text-[rgb(var(--text-main))] hover:bg-slate-800 transition-colors">
+            View All Recommendations
+        </Link>
       </div>
     </div>
   );

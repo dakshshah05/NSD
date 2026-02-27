@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import ThreeBackground from './ThreeBackground';
+import Chatbot from './Chatbot';
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -43,6 +44,8 @@ const Layout = ({ children }) => {
           {children}
         </main>
       </div>
+
+      <Chatbot />
     </div>
   );
 };
