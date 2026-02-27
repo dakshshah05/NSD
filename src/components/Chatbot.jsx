@@ -1,6 +1,36 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot, Loader2 } from 'lucide-react';
+import { X, Send, Bot, Loader2 } from 'lucide-react';
 import { getMockData } from '../data/mockData';
+
+const CuteAnimatedBot = () => (
+  <div className="relative flex items-center justify-center animate-float-bot w-8 h-8">
+    <style>
+      {`
+        @keyframes wave-hand {
+          0%, 100% { transform: rotate(0deg); }
+          10%, 30%, 50%, 70%, 90% { transform: rotate(14deg); }
+          20%, 40%, 60%, 80% { transform: rotate(-8deg); }
+        }
+        .animate-wave-hand {
+          animation: wave-hand 2.5s infinite;
+          transform-origin: bottom right;
+        }
+        @keyframes float-bot {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-4px); }
+        }
+        .animate-float-bot {
+          animation: float-bot 3s ease-in-out infinite;
+        }
+      `}
+    </style>
+    <Bot size={28} className="text-white drop-shadow-md" />
+    <div className="absolute -top-3 -right-3 text-xl animate-wave-hand drop-shadow-sm hover:scale-125 transition-transform cursor-pointer">
+      👋
+    </div>
+  </div>
+);
+
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -61,9 +91,9 @@ Answer the user's questions about energy consumption, savings, and general campu
       {/* Floating Button */}
       <button 
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 p-4 rounded-full bg-indigo-600 text-white shadow-xl hover:bg-indigo-700 transition-all transform hover:scale-110 z-50 ${isOpen ? 'hidden' : 'flex'}`}
+        className={`fixed bottom-6 right-6 p-3 rounded-full bg-indigo-600 text-white shadow-xl hover:bg-indigo-700 transition-all transform hover:scale-110 z-50 ${isOpen ? 'hidden' : 'flex'}`}
       >
-        <MessageSquare size={24} />
+        <CuteAnimatedBot />
       </button>
 
       {/* Chat Window */}
