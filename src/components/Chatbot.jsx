@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Bot, Loader2 } from 'lucide-react';
 import { getMockData } from '../data/mockData';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -28,36 +27,28 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      
-      if (!apiKey) {
-        setMessages(prev => [...prev, { 
-          text: "I need a Gemini API key to answer your questions! Please add `VITE_GEMINI_API_KEY=your_key_here` to your `.env` file.", 
-          sender: 'bot' 
-        }]);
-        setIsLoading(false);
-        return;
-      }
-
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
       // Add system context using today's data so it knows about energy
       const todayData = getMockData(new Date().toISOString().split('T')[0]);
-      const systemContext = `You are a helpful AI Energy Assistant for a college campus dashboard. 
-Today's simulated data context: ${JSON.stringify(todayData)}. 
-Answer the user's questions about energy consumption, savings, and general campus block details concisely and accurately. Use Markdown for formatting if helpful.`;
-
-      const prompt = `${systemContext}\n\nUser Question: ${userMsg}`;
       
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
+      const systemContext = `You are a highly intelligent, concise AI Energy Assistant for a college campus dashboard. 
+Today's simulated data context: ${JSON.stringify(todayData)}. 
+Answer the user's questions about energy consumption, savings, and general campus block details concisely and accurately. Use Markdown for formatting if helpful. Keep answers under 4 sentences.`;
+
+      const aiPrompt = encodeURIComponent(`${systemContext}\n\nUser Question: ${userMsg}\n\nAI Response:`);
+      
+      const response = await fetch(`https://text.pollinations.ai/${aiPrompt}`, {
+         method: 'GET'
+      });
+      
+      if (!response.ok) throw new Error("API failed");
+      
+      const responseText = await response.text();
 
       setMessages(prev => [...prev, { text: responseText, sender: 'bot' }]);
     } catch (error) {
       console.error("Chatbot API Error:", error);
       setMessages(prev => [...prev, { 
-        text: "Sorry, I encountered an error connecting to the AI service. Please check your API key and network connection.", 
+        text: "Sorry, I encountered a network error connecting to the free AI service. Please try again later.", 
         sender: 'bot' 
       }]);
     } finally {

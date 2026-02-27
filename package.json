@@ -14,7 +14,6 @@
     "@capacitor/cli": "^8.1.0",
     "@capacitor/core": "^8.1.0",
     "@emailjs/browser": "^4.4.1",
-    "@google/generative-ai": "^0.24.1",
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
