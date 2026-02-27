@@ -39,6 +39,7 @@ const Analytics = () => {
   const { user, role } = useAuth();
   const { addNotification } = useNotifications();
   const [dayData, setDayData] = useState(null);
+  const [forecastRange, setForecastRange] = useState('day');
   React.useEffect(() => {
     async function load() {
       setDayData(null);
@@ -84,7 +85,7 @@ const Analytics = () => {
   });
 
   // Forecasting Data (Mocked Time Series Prediction)
-  const [forecastRange, setForecastRange] = useState("day");
+  // const [forecastRange, setForecastRange] = useState("day"); // removed duplicate
 
   const generateForecast = (range) => {
     const data = [];
