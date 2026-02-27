@@ -3,31 +3,32 @@ import { X, Send, Bot, Loader2 } from 'lucide-react';
 import { getMockData } from '../data/mockData';
 
 const CuteAnimatedBot = () => (
-  <div className="relative flex items-center justify-center animate-float-bot w-8 h-8">
+  <div className="relative flex items-center justify-center animate-float-bot w-16 h-16">
     <style>
       {`
-        @keyframes wave-hand {
+        @keyframes wave-robot {
           0%, 100% { transform: rotate(0deg); }
-          10%, 30%, 50%, 70%, 90% { transform: rotate(14deg); }
-          20%, 40%, 60%, 80% { transform: rotate(-8deg); }
+          25% { transform: rotate(12deg); }
+          75% { transform: rotate(-8deg); }
         }
-        .animate-wave-hand {
-          animation: wave-hand 2.5s infinite;
-          transform-origin: bottom right;
+        .animate-wave-robot {
+          animation: wave-robot 2s ease-in-out infinite;
+          transform-origin: bottom center;
         }
         @keyframes float-bot {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-4px); }
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-8px) scale(1.05); }
         }
         .animate-float-bot {
-          animation: float-bot 3s ease-in-out infinite;
+          animation: float-bot 3.5s ease-in-out infinite;
         }
       `}
     </style>
-    <Bot size={28} className="text-white drop-shadow-md" />
-    <div className="absolute -top-3 -right-3 text-xl animate-wave-hand drop-shadow-sm hover:scale-125 transition-transform cursor-pointer">
-      👋
-    </div>
+    <img 
+      src="/3d-robot.png" 
+      alt="Waving 3D Robot" 
+      className="w-full h-full object-cover rounded-full drop-shadow-2xl animate-wave-robot border-4 border-white shadow-[0_0_15px_rgba(79,70,229,0.5)]"
+    />
   </div>
 );
 
@@ -91,7 +92,7 @@ Answer the user's questions about energy consumption, savings, and general campu
       {/* Floating Button */}
       <button 
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 p-3 rounded-full bg-indigo-600 text-white shadow-xl hover:bg-indigo-700 transition-all transform hover:scale-110 z-50 ${isOpen ? 'hidden' : 'flex'}`}
+        className={`fixed bottom-6 right-6 z-50 transition-all transform hover:scale-110 active:scale-95 ${isOpen ? 'hidden' : 'flex'}`}
       >
         <CuteAnimatedBot />
       </button>
