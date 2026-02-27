@@ -1,14 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
-let genAI = null;
-let model = null;
-
-if (API_KEY) {
-  genAI = new GoogleGenerativeAI(API_KEY);
-  model = genAI.getGenerativeModel({ model: "gemini-pro" });
-}
+// Removed Google Generative AI dependency as we migrated to a free, keyless endpoint.
+// Using text.pollinations.ai instead.
 
 export const analyzeEnergyData = async (dataContext) => {
     // Helper to generate recommendations from known issues or fallbacks
@@ -46,28 +37,31 @@ export const analyzeEnergyData = async (dataContext) => {
         ];
     };
 
-    if (!model) {
-        if (!API_KEY) {
-            console.warn("Gemini API Key is missing. Using Simulation Mode.");
-            const simulatedRecs = generateSmartFallback(dataContext);
-            return {
-                summary: "Demo Mode: API Key missing. Showing simulated analysis based on data context.",
-                recommendations: simulatedRecs
-            };
-        }
-        // ... re-init logic
-    }
-
     try {
-        // ... API Call logic
-        const result = await model.generateContent(prompt);
-        // ... parse logic
-        return JSON.parse(cleanText);
+        const insightsPrompt = `Analyze this college energy data context and provide exactly TWO distinct smart, actionable recommendations for energy optimization. 
+Data Context: ${JSON.stringify(dataContext)}
+Return ONLY a valid JSON array of two objects. Each object must strictly match this format:
+{"id": "unique-string", "title": "Short Tech Title", "description": "1 sentence explanation.", "priority": "High/Medium/Low", "savings": "X%", "action": "Action Button Text"}
+Do not include any other markdown, text, or explanations. Just the JSON array.`;
+
+        const encodedPrompt = encodeURIComponent(insightsPrompt);
+        const response = await fetch(`https://text.pollinations.ai/${encodedPrompt}`);
+        
+        if (!response.ok) throw new Error("Free AI Error");
+        let rawContent = await response.text();
+        
+        // Clean markdown block if the model returned it despite instructions
+        rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        return {
+            summary: "AI analysis complete based on current conditions.",
+            recommendations: JSON.parse(rawContent)
+        };
 
     } catch (error) {
-        console.error("Gemini Analysis Failed:", error);
+        console.error("AI Analysis Failed. Falling back:", error);
         return {
-            summary: "Live analysis unavailable. Showing insights based on historical patterns.",
+            summary: "Live analysis temporarily unavailable. Showing insights based on historical patterns.",
             recommendations: generateSmartFallback(dataContext)
         };
     }
