@@ -1,34 +1,92 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, Loader2 } from 'lucide-react';
 import { getMockData } from '../data/mockData';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Float } from '@react-three/drei';
+
+const RobotModel = () => {
+  const rightArmRef = useRef();
+
+  // Animate the right arm waving
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    if (rightArmRef.current) {
+      // Base rotation + sine wave for waving
+      rightArmRef.current.rotation.z = Math.sin(time * 5) * 0.5 - 2.5;
+    }
+  });
+
+  return (
+    <group position={[0, -0.5, 0]}>
+      {/* Head */}
+      <mesh position={[0, 1.2, 0]}>
+        <boxGeometry args={[1, 0.8, 1]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.2} metalness={0.1} />
+      </mesh>
+      
+      {/* Eyes */}
+      <mesh position={[-0.2, 1.3, 0.51]}>
+        <sphereGeometry args={[0.1, 16, 16]} />
+        <meshBasicMaterial color="#3b82f6" />
+      </mesh>
+      <mesh position={[0.2, 1.3, 0.51]}>
+        <sphereGeometry args={[0.1, 16, 16]} />
+        <meshBasicMaterial color="#3b82f6" />
+      </mesh>
+
+      {/* Antenna */}
+      <mesh position={[0, 1.7, 0]}>
+        <cylinderGeometry args={[0.02, 0.05, 0.4]} />
+        <meshStandardMaterial color="#94a3b8" metalness={0.8} />
+      </mesh>
+      <mesh position={[0, 1.9, 0]}>
+        <sphereGeometry args={[0.1, 16, 16]} />
+        <meshBasicMaterial color="#ef4444" />
+      </mesh>
+
+      {/* Body */}
+      <mesh position={[0, 0.4, 0]}>
+        <cylinderGeometry args={[0.6, 0.6, 0.8, 32]} />
+        <meshStandardMaterial color="#e2e8f0" roughness={0.3} metalness={0.2} />
+      </mesh>
+
+      {/* Left Arm (static) */}
+      <group position={[-0.7, 0.4, 0]}>
+        <mesh rotation={[0, 0, 0.5]}>
+          <capsuleGeometry args={[0.15, 0.4, 8, 16]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.4} />
+        </mesh>
+      </group>
+
+      {/* Right Arm (waving) */}
+      <group position={[0.7, 0.6, 0]}>
+        <group ref={rightArmRef}>
+          <mesh position={[0, -0.3, 0]}>
+            <capsuleGeometry args={[0.15, 0.4, 8, 16]} />
+            <meshStandardMaterial color="#cbd5e1" roughness={0.4} />
+          </mesh>
+        </group>
+      </group>
+
+      {/* Base/Wheels */}
+      <mesh position={[0, -0.1, 0]}>
+        <sphereGeometry args={[0.4, 32, 32]} />
+        <meshStandardMaterial color="#64748b" roughness={0.8} />
+      </mesh>
+    </group>
+  );
+};
 
 const CuteAnimatedBot = () => (
-  <div className="relative flex items-center justify-center animate-float-bot w-16 h-16">
-    <style>
-      {`
-        @keyframes wave-robot {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(12deg); }
-          75% { transform: rotate(-8deg); }
-        }
-        .animate-wave-robot {
-          animation: wave-robot 2s ease-in-out infinite;
-          transform-origin: bottom center;
-        }
-        @keyframes float-bot {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-8px) scale(1.05); }
-        }
-        .animate-float-bot {
-          animation: float-bot 3.5s ease-in-out infinite;
-        }
-      `}
-    </style>
-    <img 
-      src="/3d-robot.png" 
-      alt="Waving 3D Robot" 
-      className="w-full h-full object-cover rounded-full drop-shadow-2xl animate-wave-robot border-4 border-white shadow-[0_0_15px_rgba(79,70,229,0.5)]"
-    />
+  <div className="relative flex items-center justify-center w-20 h-20 pointer-events-none rounded-full drop-shadow-[0_0_15px_rgba(79,70,229,0.6)]">
+    <Canvas camera={{ position: [0, 1, 4], fov: 50 }} style={{ background: 'transparent' }}>
+      <ambientLight intensity={1.5} />
+      <directionalLight position={[10, 10, 5]} intensity={2} color="#ffffff" />
+      <pointLight position={[-10, 0, 10]} intensity={1} color="#4f46e5" />
+      <Float speed={3} rotationIntensity={0.2} floatIntensity={0.5}>
+        <RobotModel />
+      </Float>
+    </Canvas>
   </div>
 );
 
