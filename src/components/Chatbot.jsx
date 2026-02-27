@@ -12,66 +12,73 @@ const RobotModel = () => {
     const time = state.clock.getElapsedTime();
     if (rightArmRef.current) {
       // Base rotation + sine wave for waving
-      rightArmRef.current.rotation.z = Math.sin(time * 5) * 0.5 - 2.5;
+      rightArmRef.current.rotation.z = Math.sin(time * 6) * 0.4 - 2.2;
     }
   });
 
+  // Material for the glossy white plastic look
+  const bodyMaterial = <meshStandardMaterial color="#ffffff" roughness={0.1} metalness={0.2} clearcoat={1} />;
+
   return (
-    <group position={[0, -0.5, 0]}>
-      {/* Head */}
-      <mesh position={[0, 1.2, 0]}>
-        <boxGeometry args={[1, 0.8, 1]} />
-        <meshStandardMaterial color="#ffffff" roughness={0.2} metalness={0.1} />
+    <group position={[0, -0.6, 0]}>
+      {/* Head + Body (Egg shape / Capsule) */}
+      <mesh position={[0, 0.8, 0]}>
+        <capsuleGeometry args={[0.55, 0.5, 32, 32]} />
+        {bodyMaterial}
       </mesh>
       
-      {/* Eyes */}
-      <mesh position={[-0.2, 1.3, 0.51]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshBasicMaterial color="#3b82f6" />
+      {/* Face Plate (Curved black screen) */}
+      <mesh position={[0, 1.1, 0.45]} rotation={[-0.2, 0, 0]}>
+        <capsuleGeometry args={[0.3, 0.2, 32, 32]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.2} metalness={0.8} />
       </mesh>
-      <mesh position={[0.2, 1.3, 0.51]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshBasicMaterial color="#3b82f6" />
+
+      {/* Glowing Blue Eyes */}
+      <mesh position={[-0.15, 1.15, 0.72]} rotation={[-0.2, 0, 0]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
+        <meshBasicMaterial color="#38bdf8" />
+      </mesh>
+      <mesh position={[0.15, 1.15, 0.72]} rotation={[-0.2, 0, 0]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
+        <meshBasicMaterial color="#38bdf8" />
       </mesh>
 
       {/* Antenna */}
-      <mesh position={[0, 1.7, 0]}>
-        <cylinderGeometry args={[0.02, 0.05, 0.4]} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.8} />
+      <mesh position={[0, 1.65, 0]}>
+        <cylinderGeometry args={[0.02, 0.04, 0.3]} />
+        <meshStandardMaterial color="#cbd5e1" metalness={0.8} />
       </mesh>
-      <mesh position={[0, 1.9, 0]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshBasicMaterial color="#ef4444" />
-      </mesh>
-
-      {/* Body */}
-      <mesh position={[0, 0.4, 0]}>
-        <cylinderGeometry args={[0.6, 0.6, 0.8, 32]} />
-        <meshStandardMaterial color="#e2e8f0" roughness={0.3} metalness={0.2} />
+      <mesh position={[0, 1.8, 0]}>
+        <sphereGeometry args={[0.08, 16, 16]} />
+        <meshBasicMaterial color="#38bdf8" />
       </mesh>
 
       {/* Left Arm (static) */}
-      <group position={[-0.7, 0.4, 0]}>
-        <mesh rotation={[0, 0, 0.5]}>
-          <capsuleGeometry args={[0.15, 0.4, 8, 16]} />
-          <meshStandardMaterial color="#cbd5e1" roughness={0.4} />
+      <group position={[-0.65, 0.6, 0]}>
+        <mesh rotation={[0, 0, 0.4]}>
+          <capsuleGeometry args={[0.12, 0.4, 16, 16]} />
+          {bodyMaterial}
         </mesh>
       </group>
 
       {/* Right Arm (waving) */}
-      <group position={[0.7, 0.6, 0]}>
+      <group position={[0.65, 0.7, 0]}>
         <group ref={rightArmRef}>
-          <mesh position={[0, -0.3, 0]}>
-            <capsuleGeometry args={[0.15, 0.4, 8, 16]} />
-            <meshStandardMaterial color="#cbd5e1" roughness={0.4} />
+          <mesh position={[0, -0.25, 0]}>
+            <capsuleGeometry args={[0.12, 0.4, 16, 16]} />
+            {bodyMaterial}
           </mesh>
         </group>
       </group>
 
-      {/* Base/Wheels */}
-      <mesh position={[0, -0.1, 0]}>
+      {/* Floating Thrust Base */}
+      <mesh position={[0, 0.2, 0]}>
         <sphereGeometry args={[0.4, 32, 32]} />
-        <meshStandardMaterial color="#64748b" roughness={0.8} />
+        <meshStandardMaterial color="#94a3b8" roughness={0.5} metalness={0.8} />
+      </mesh>
+      <mesh position={[0, -0.1, 0]}>
+        <sphereGeometry args={[0.2, 16, 16]} />
+        <meshBasicMaterial color="#38bdf8" />
       </mesh>
     </group>
   );
